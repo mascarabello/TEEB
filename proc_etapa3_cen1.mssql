@@ -1,0 +1,119 @@
+/*  ETAPA 3 : Alocacao de RDP e RDP com ILP e imoveis rurais */
+
+
+--- CENARIO 1 - ALOCACAO DO RDP
+-- Os dados dos cenarios foram adicionados no BD a partir do scrip cont_pixel_cenarios.r
+SELECT * FROM public.teeb_cpixels_cenarios
+
+-- Copiando tabela do schema do public para o teeb
+/* Não precisa ficar rodando o trecho abaixo sempre, apenas quando atualizar os cenários */
+DROP TABLE IF EXISTS teeb.teeb_cpixels_cenarios;
+CREATE TABLE teeb.teeb_cpixels_cenarios AS 
+SELECT *
+FROM public.teeb_cpixels_cenarios
+
+SELECT * FROM teeb.teeb_cpixels_cenarios LIMIT 10;
+
+-- Apagando do schema public
+DROP TABLE IF EXISTS public.teeb_cpixels_cenarios;
+
+
+
+SELECT substring(mesoregiao::text, 1, 2)::int  as cd_uf, cenario1, sum(area_ha) as area_c1
+FROM teeb.teeb_cpixels_cenarios
+GROUP BY cd_uf, cenario1
+
+select sum(area_ha) as area_c1
+FROM teeb.teeb_cpixels_cenarios
+where cenario1 = '100' OR cenario1 = '1000'
+
+
+DROP TABLE IF EXISTS teeb.results_cen1;
+CREATE TABLE teeb.results_cen1 AS 
+SELECT 
+idcar_imaflora, 
+sum(area_ha) as area_pd
+FROM teeb.teeb_cpixels_cenarios where cenario1 = '100' OR cenario1 = '1000'
+GROUP BY idcar_imaflora
+
+
+select * FROM teeb.results_cen1
+select sum(area_pd) FROM teeb.results_cen1 where idcar_imaflora != 0.0
+
+
+DROP TABLE IF EXISTS teeb.results_cen1_rank;
+CREATE TABLE teeb.results_cen1_rank AS 
+SELECT 
+a.idcar_imaflora,
+b.cd_mun,
+b.regioes_term,
+b.tamanho,
+b.ind_infra,
+b.ind_aptidao, 
+b.ind_credrural, 
+b.indmedio,
+b.posicao,
+b.posicao2,
+a.area_pd,
+sum(a.area_pd) OVER(PARTITION BY b.regioes_term,b.tamanho ORDER BY b.posicao2 ASC) as area_acumulada
+FROM teeb.results_cen1 as a,
+     teeb.teeb_indicadores_rank as b
+WHERE a.idcar_imaflora = b.gid
+
+
+select sum(area_pd) FROM teeb.results_cen1_rank 
+
+DROP TABLE IF EXISTS teeb.results_cen1_final;
+CREATE TABLE teeb.results_cen1_final AS 
+SELECT
+a.idcar_imaflora, 
+a.cd_mun,
+a.regioes_term,
+a.tamanho,
+a.area_pd,
+a.posicao,
+a.posicao2,
+a.area_acumulada,
+b.area_rpd_final, 
+CASE 
+  WHEN area_acumulada <= area_rpd_final THEN 3
+  ELSE 1
+END recuperar  
+FROM teeb.results_cen1_rank a,
+	 teeb.meta_cen1 b
+WHERE a.regioes_term = b.regioes_term AND a.tamanho = b.tamanho
+GROUP BY a.idcar_imaflora, a.cd_mun, a.regioes_term, a.tamanho, a.area_pd, a.area_acumulada, a.posicao, a.posicao2, b.area_rpd_final
+
+
+select * from teeb.meta_cen1 limit 10
+
+select * from teeb.results_cen1_final limit 10
+
+DROP TABLE IF EXISTS teeb.results_cen1_final_geom_4674;
+CREATE TABLE teeb.results_cen1_final_geom_4674 AS 
+select
+a.idcar_imaflora, 
+a.recuperar,
+b.geom
+from teeb.results_cen1_final as a,
+     teeb.landtenure_v202105_4674_imovel as b
+where a.idcar_imaflora = b.gid
+
+select * FROM  teeb.landtenure_v202105_4674_imovel limit 10
+select sum(area_pd)/1000000 FROM teeb.results_cen1_final WHERE recuperar = '2'
+
+
+select * from teeb.results_cen1_final_geom_4674 
+
+-- Download do dado do DB no terminal [GDAL] -rodando
+/* ogr2ogr -f GPKG -t_srs EPSG:4674 /Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen1_final_geom_4674.gpkg  "PG:host=localhost user=postgres dbname=postgres password=postgres" -sql "SELECT * FROM teeb.results_cen1_final_geom_4674" 
+*/
+
+-- Rasterizar o gpkg [GDAL] - 
+/* gdal_rasterize -ot "UInt32" -te -74.8973961 -34.7917510 -33.0613262 7.9120915 -a_srs EPSG:4674  -co "COMPRESS=DEFLATE" -co "BIGTIFF=IF_SAFER" -co "NUM_THREADS=4" /Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen1_final_geom_4674.gpkg -ts 155239 158459 -a recuperar /Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen1_final_geom_4674.tif 
+*/
+
+-- Reprojetar para projecao albers 100m [GDAL]
+/* gdalwarp -s_srs EPSG:4674 -t_srs "+proj=aea +lat_1=-2 +lat_2=-22 +lat_0=-12 +lon_0=-54 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs" -tr 100 100  -te -2178091.5413726898841560 -2385764.0860471501946449 2610358.4586273101158440 1902825.9139528500381857  -co "COMPRESS=DEFLATE" -co "ZLEVEL=9" -co "PREDICTOR=2" -co "BIGTIFF=IF_SAFER" -co "NUM_THREADS=8"  /Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen1_final_geom_4674.tif  /Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen1_final_geom_albers_100m.tif
+*/
+

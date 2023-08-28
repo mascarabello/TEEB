@@ -1,0 +1,246 @@
+
+-- ETAPA 1: OBJETIVO: Definir area (ha) de RDP e ILP por tamanho de imoveis e regiao.
+-- Para atingir este objetivo, primeiramente vamos definir a meta de RDP e RDP com ILP por regiao do TERM-BR e
+-- depois calcular a proporcao de pastagem degradada por imovel e faixa de tamanho. E finalmente calcular 
+-- a area de RDP e RDP com ILP por tamanho de imoveis e regiao.
+
+-- TABELAS FINAIS DESTA ETAPA:
+-- teeb.meta_cen1
+-- teeb.meta_cen2
+
+-- PARTE 1:  Meta de RDP e RDP com ILP por regiao do TERM
+/* Tabela com as metas de RDP e RDP com ILP por regiao do TERM-BR -- informacao fornecida pelo Giovani 
+   Tabela foi adicionada ao schema public atraves do script em R preproc_importantoinputBD
+   Copiando tabela do schema do public para o teeb
+IMPORTANTE:  Nao precisa ficar rodando o trecho abaixo, apenas quando tiver atualizacao das metas.*/
+SELECT * from public.input_termbr_rpd_cen1_cen2
+
+DROP TABLE IF EXISTS teeb.input_termbr_rpd_cen1_cen2;
+CREATE TABLE teeb.input_termbr_rpd_cen1_cen2 AS 
+SELECT * 
+from public.input_termbr_rpd_cen1_cen2
+
+select * FROM teeb.input_termbr_rpd_cen1_cen2 
+
+-- Apagando a tabela do schema public
+DROP TABLE IF EXISTS public.input_termbr_rpd_cen1_cen2 ;
+
+-- Conferindo as metas 
+select 
+sum(area_rpd_cen1)/1000000 as areardpcen1, 
+sum(area_rpdilp_cen2)/1000000 as areailp, 
+sum(area_rpdrest_cen2)/1000000 as areardpcen2 
+FROM teeb.input_termbr_rpd_cen1_cen2
+
+select * FROM teeb.input_termbr_rpd_cen1_cen2
+
+
+-- PARTE 2: calcular a proporcao de pastagem degradada por imovel e faixa de tamanho
+/* 
+A partir das informacoes de imoveis da base de dados da malha do IMAFLORA v2021, criar tabela 
+com as classes de tamanho, assim como o mapeamento dos estados com as regioes do TERM-BR
+*/
+DROP TABLE IF EXISTS teeb.imoveis_regioesterm; 
+CREATE TABLE teeb.imoveis_regioesterm AS
+SELECT 
+a.gid, 
+a.cd_mun, 
+substring(cd_mun::text, 1, 2)::int as cd_uf,
+a.sub_class, 
+a.area,
+CASE
+    WHEN a.area/10000.0 = 0.0 THEN 'ERRO' 
+    WHEN a.area/10000.0 > 0.0 AND a.area/10000.0 <= 50.0 THEN '0-50'
+	WHEN a.area/10000.0 > 50.0 AND a.area/10000.0 <= 100.0 THEN '50-100'
+	WHEN a.area/10000.0 > 100.0 AND a.area/10000.0 <= 500.0 THEN '100-500'
+	WHEN a.area/10000.0 > 500.0 AND a.area/10000.0 <= 1000.0 THEN '500-1000'	
+	WHEN a.area/10000.0 > 1000.0 THEN '>1000 '	
+END tamanho
+FROM teeb.pa_br_landtenure_v202105_albers_imovel as a
+WHERE a.cd_mun IS NOT NULL AND area != 0.0
+GROUP BY a.gid, a.cd_mun, cd_uf, a.sub_class, a.area
+
+
+select tamanho, sum(area) as areafinal
+FROM teeb.imoveis_regioesterm
+GROUP BY tamanho
+
+
+select * FROM teeb.imoveis_regioesterm limit 10
+
+ALTER TABLE teeb.imoveis_regioesterm ADD COLUMN regioes_term text NULL;
+
+UPDATE teeb.imoveis_regioesterm 
+   SET regioes_term = CASE 
+    WHEN cd_uf = 11  THEN 'RO'
+    WHEN cd_uf = 12  THEN 'AMACRR'
+    WHEN cd_uf = 13  THEN 'AMACRR'
+	WHEN cd_uf = 14  THEN 'AMACRR'
+	WHEN cd_uf = 15  THEN 'PAAP'	
+	WHEN cd_uf = 16  THEN 'PAAP'	
+	WHEN cd_uf = 17  THEN 'MATO'	
+	WHEN cd_uf = 21  THEN 'MATO'	
+	WHEN cd_uf = 22  THEN 'PIBA'	
+	WHEN cd_uf = 23  THEN 'RestanteNE'
+	WHEN cd_uf = 24  THEN 'RestanteNE'	
+	WHEN cd_uf = 25  THEN 'RestanteNE'
+	WHEN cd_uf = 26  THEN 'RestanteNE'	
+	WHEN cd_uf = 27  THEN 'RestanteNE'
+	WHEN cd_uf = 28  THEN 'RestanteNE'	
+	WHEN cd_uf = 29  THEN 'PIBA'		
+	WHEN cd_uf = 31  THEN 'MG'			
+	WHEN cd_uf = 32  THEN 'RestanteSE'			
+	WHEN cd_uf = 33  THEN 'RestanteSE'			
+	WHEN cd_uf = 35  THEN 'SP'				
+	WHEN cd_uf = 41  THEN 'PR'					
+	WHEN cd_uf = 42  THEN 'RestanteSUL'					
+	WHEN cd_uf = 43  THEN 'RestanteSUL'					
+	WHEN cd_uf = 50  THEN 'MS'
+	WHEN cd_uf = 51  THEN 'MT'	
+	WHEN cd_uf = 52  THEN 'GODF'	
+	WHEN cd_uf = 53  THEN 'GODF'	
+END;
+
+select * FROM teeb.imoveis_regioesterm limit 10
+
+
+/* Dados de Qualidade de Pastagem do ano de 2020 (LAPIG) 
+   Os dados de qualidade de pixel foram incluidos no DB atraves do script em R 1_countpixel_qp2020 
+   Copiando a tabela para schema teeb */
+
+select * FROM public.teeb_qp2020_imovel_100m LIMIT 10;
+
+
+DROP TABLE IF EXISTS teeb.teeb_qp2020_imovel_100m;
+CREATE TABLE teeb.teeb_qp2020_imovel_100m AS 
+SELECT * 
+from public.teeb_qp2020_imovel_100m
+
+select * FROM teeb.teeb_qp2020_imovel_100m 
+
+-- Apagando a tabela do schema public
+DROP TABLE IF EXISTS public.teeb_qp2020_imovel_100m ;
+
+
+-- conferindo os totais
+select qualipast_2020, sum(area_ha) as area_ha 
+FROM teeb.teeb_qp2020_imovel_100m
+group by qualipast_2020
+-- os números batem com os dados do lapig
+
+
+--where substring(cd_mun::text, 1, 2)::int = 29
+select * from teeb.imoveis_regioesterm   
+/* Junção da tabela de qualidade de pastagem com informações de regiões do TERM-BR */
+DROP TABLE IF EXISTS teeb.teeb_qualidadepastagem2020_imoveis; 
+CREATE TABLE teeb.teeb_qualidadepastagem2020_imoveis AS
+SELECT 
+a.idcar_imaflora, 
+substring(a.mesoregiao::text, 1, 2)::int as cd_uf, 
+b.tamanho,
+b.regioes_term,
+a.qualipast_2020, 
+sum(a.area_ha) as area_qp
+FROM teeb.teeb_qp2020_imovel_100m as a, 
+     teeb.imoveis_regioesterm as b
+WHERE a.idcar_imaflora = b.gid AND substring(a.mesoregiao::text, 1, 2)::int = b.cd_uf AND a.qualipast_2020 IS NOT NULL
+GROUP BY a.idcar_imaflora, substring(a.mesoregiao::text, 1, 2)::int, b.tamanho, b.regioes_term,  a.qualipast_2020
+
+
+select * FROM teeb.teeb_qualidadepastagem2020_imoveis limit 10
+ 
+
+-- Tabela com área de pastagem degradada em 2020 por regiao e tamannho
+DROP TABLE IF EXISTS teeb.teeb_pdegradada2020_imovel_tamanho_regiao; 
+CREATE TABLE teeb.teeb_pdegradada2020_imovel_tamanho_regiao AS
+SELECT 
+regioes_term, tamanho, sum(area_qp) as area_pastdegradada
+FROM teeb.teeb_qualidadepastagem2020_imoveis  
+WHERE qualipast_2020 = '1' OR qualipast_2020 = '2'
+GROUP BY regioes_term, tamanho
+
+select * from teeb.teeb_pdegradada2020_imovel_tamanho_regiao; 
+
+DROP TABLE IF EXISTS teeb.teeb_pdegradada2020_regiao; 
+CREATE TABLE teeb.teeb_pdegradada2020_regiao AS
+SELECT 
+regioes_term, sum(area_pastdegradada) as area_pd_regioesterm
+FROM teeb.teeb_pdegradada2020_imovel_tamanho_regiao  
+GROUP BY regioes_term
+
+select * from teeb.teeb_pdegradada2020_regiao; 
+
+
+-- Tabela com percentual de pastagem degradada por regiao e tamanho de imovel
+DROP TABLE IF EXISTS teeb.teeb_perc_pdegradada2020; 
+CREATE TABLE teeb.teeb_perc_pdegradada2020 AS
+SELECT 
+    pp.regioes_term, 
+	pp.tamanho, 
+    pp.area_pastdegradada,
+    pt.area_pd_regioesterm,
+	pp.area_pastdegradada/pt.area_pd_regioesterm as perc
+FROM teeb.teeb_pdegradada2020_imovel_tamanho_regiao as pp
+JOIN teeb.teeb_pdegradada2020_regiao as pt USING(regioes_term)
+
+
+
+-- PARTE 3:  Criando tabela com as metas de recuperacao por regiao do term e tamanho de imovel
+-- CENARIO 1
+DROP TABLE IF EXISTS teeb.meta_cen1;
+CREATE TABLE teeb.meta_cen1 AS 
+SELECT 
+a.regioes_term,
+a.tamanho,
+a.perc,
+b.area_rpd_cen1,
+b.area_rpd_cen1*a.perc as area_rpd_final
+FROM teeb.teeb_perc_pdegradada2020 a,
+     teeb.input_termbr_rpd_cen1_cen2 b
+WHERE a.regioes_term = b.regioes_term 
+
+select * from teeb.input_termbr_rpd_cen1_cen2
+select * from teeb.meta_cen1
+
+
+-- Checagem
+select 
+sum(area_rpd_final)/1000000 as areardp_final
+FROM teeb.meta_cen1
+
+
+-- CENARIO 2
+DROP TABLE IF EXISTS teeb.meta_cen2;
+CREATE TABLE teeb.meta_cen2 AS 
+SELECT 
+a.regioes_term,
+a.tamanho,
+a.perc,
+b.area_rpdrest_cen2,
+b.area_rpdilp_cen2,
+(b.area_rpdrest_cen2+b.area_rpdilp_cen2)*a.perc as area_rpd_final
+FROM teeb.teeb_perc_pdegradada2020 a,
+     teeb.input_termbr_rpd_cen1_cen2 b
+WHERE a.regioes_term = b.regioes_term
+
+select * FROM teeb.meta_cen2
+
+ALTER TABLE teeb.meta_cen2 ADD COLUMN area_rilp_final float8 NULL;
+UPDATE teeb.meta_cen2 
+   SET area_rilp_final = area_rpd_final*(area_rpdilp_cen2/(area_rpdrest_cen2+area_rpdilp_cen2))
+
+ALTER TABLE teeb.meta_cen2 ADD COLUMN area_rpdrest_final float8 NULL;
+UPDATE teeb.meta_cen2 
+   SET area_rpdrest_final = area_rpd_final*(area_rpdrest_cen2/(area_rpdrest_cen2+area_rpdilp_cen2))
+
+
+-- Checagem
+select 
+sum(area_rpd_final)/1000000 as areardp_final,
+sum(area_rilp_final)/1000000 as area_rilp_final,
+sum(area_rpdrest_final)/1000000 as area_rpdrest_final,
+sum(area_rpdilp_cen2)/1000000 as areailpcen2, 
+sum(area_rpdrest_cen2)/1000000 as areardpcen2 
+FROM teeb.meta_cen2
+
+

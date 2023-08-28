@@ -1,0 +1,43 @@
+
+-- ETAPA 2: OBJETIVO: Gerar um ranking de imoveis para alocacao espacial de RDP e ILP 
+-- Para atingir este objetivo, primeiramente vamos calcular a aptidao media e a infraestrutura media para cada imovel, 
+-- posteriormente calcularemos o indicador de credito rural. Por fim, teremos um indicador medio por tamanho de imovel 
+-- e regiao.
+
+-- TABELA FINAL: teeb.teeb_indicadores_rank
+
+-- PARTE 3: Ranqueamento dos imoveis por tamanho e regioes do TERM-BR para alocacao espacial 
+
+select * FROM teeb.teeb_indice_aptidao_infra
+
+select * FROM teeb.teeb_indice_credito LIMIT 10
+
+DROP TABLE IF EXISTS teeb.teeb_indicadores;
+CREATE TABLE teeb.teeb_indicadores AS 
+SELECT 
+a.gid as gid,
+a.cd_mun as cd_mun,
+a.regioes_term as regioes_term,
+a.tamanho as tamanho,
+a.ind_infra as ind_infra,
+a.ind_aptidao as ind_aptidao,
+b.indicador as ind_credrural,
+(a.ind_infra+a.ind_aptidao+b.indicador)/3.0 as indmedio
+FROM teeb.teeb_indice_aptidao_infra as a,
+     teeb.teeb_indice_credito as b
+WHERE a.gid = b.gid 
+group by a.gid, a.cd_mun, a.regioes_term, a.tamanho, a.ind_infra, a.ind_aptidao, b.indicador
+
+select * from teeb.teeb_indicadores
+
+DROP TABLE IF EXISTS teeb.teeb_indicadores_rank;
+CREATE TABLE teeb.teeb_indicadores_rank AS 
+select
+    gid, cd_mun, regioes_term, tamanho, ind_infra,ind_aptidao, ind_credrural, indmedio,
+    RANK() OVER(PARTITION BY regioes_term,tamanho ORDER BY indmedio DESC) as posicao,
+	ROW_NUMBER() OVER(PARTITION BY regioes_term,tamanho ORDER BY indmedio DESC) as posicao2
+FROM teeb.teeb_indicadores	
+   WHERE indmedio is not null
+   
+select * from teeb.teeb_indicadores_rank
+   
