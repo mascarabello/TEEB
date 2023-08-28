@@ -29,13 +29,6 @@ select * from teeb.landtenure_v202105_4674_imovel
 /* ogr2ogr -f GPKG -t_srs EPSG:4674 /Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_4674_imovel.gpkg 
 "PG:host=localhost user=postgres dbname=postgres password=postgres" -sql "SELECT * FROM teeb.landtenure_v202105_4674_imovel" */
 
--- Rasterizar o gpkg [GDAL] - rodando
-/* gdal_rasterize -ot "UInt32" -te -74.8973961 -34.7917510 -33.0613262 7.9120915 -a_srs EPSG:4674  -co "COMPRESS=DEFLATE" -co "BIGTIFF=IF_SAFER" -co "NUM_THREADS=4" /Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_4674_imovel.gpkg -ts 155239 158459 -a gid /Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_4674_imovel.tif 
-*/
-
--- Reprojetar para projecao albers 100m [GDAL]
-/* gdalwarp -s_srs EPSG:4674 -t_srs "+proj=aea +lat_1=-2 +lat_2=-22 +lat_0=-12 +lon_0=-54 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs" -tr 100 100  -te -2178091.5413726898841560 -2385764.0860471501946449 2610358.4586273101158440 1902825.9139528500381857  -co "COMPRESS=DEFLATE" -co "ZLEVEL=9" -co "PREDICTOR=2" -co "BIGTIFF=IF_SAFER" -co "NUM_THREADS=8"  /Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_4674_imovel.tif  /Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_albers_imovel_100m.tif
-*/
 
 -- Reprojetar gpkg de imoveis para albers [GDAL] - OK
 /* ogr2ogr -f GPKG -s_srs EPSG:4674 -t_srs "+proj=aea +lat_1=-2 +lat_2=-22 +lat_0=-12 +lon_0=-54 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs" /Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_albers_imovel.gpkg /Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_4674_imovel.gpkg
@@ -44,6 +37,10 @@ select * from teeb.landtenure_v202105_4674_imovel
 -- Subir GPKG para DB [GDAL] - OK
 /* ogr2ogr -f PostgreSQL "PG:user=postgres port=5432 password=postgres dbname=postgres" /Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_albers_imovel.gpkg -nlt MULTIPOLYGON -lco precision=NO
 */
+
+-- Rasterizar o gpkg [GDAL] - 100m [GDAL]
+/* gdal_rasterize -ot "UInt32" -te -2178091.5413726898841560 -2385764.0860471501946449 2610358.4586273101158440 1902825.9139528500381857 -a_srs "+proj=aea +lat_1=-2 +lat_2=-22 +lat_0=-12 +lon_0=-54 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"  -co "COMPRESS=DEFLATE" -co "BIGTIFF=IF_SAFER" -co "NUM_THREADS=4" /Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_4674_imovel.gpkg -tr 100 100 -a gid /Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_albers_imovel_100m_final.tif*/
+
 
 SELECT * FROM public.landtenure_v202105_albers_imovel
 
@@ -56,10 +53,3 @@ FROM public.landtenure_v202105_albers_imovel
 -- Apagando do schema public
 DROP TABLE IF EXISTS public.landtenure_v202105_albers_imovel
 
-
-
---- dados de mesoregião
-
-gdal_rasterize -ot "UInt32" -te -74.8973961 -34.7917510 -33.0613262 7.9120915 -a_srs EPSG:4674  -co "COMPRESS=DEFLATE" -co "BIGTIFF=IF_SAFER" -co "NUM_THREADS=4" /Users/marlucescarabello/Dropbox/Work/GPP/dados_uteis/Meso_regiao/BR_Mesorregioes_2022.shp -ts 155239 158459 -a cd_meson /Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/BR_Mesorregioes_2022.tif 
-
-gdalwarp -s_srs EPSG:4674 -t_srs "+proj=aea +lat_1=-2 +lat_2=-22 +lat_0=-12 +lon_0=-54 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs" -tr 100 100  -te -2178091.5413726898841560 -2385764.0860471501946449 2610358.4586273101158440 1902825.9139528500381857  -co "COMPRESS=DEFLATE" -co "ZLEVEL=9" -co "PREDICTOR=2" -co "BIGTIFF=IF_SAFER" -co "NUM_THREADS=8"  /Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/BR_Mesorregioes_2022.tif  /Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/BR_Mesorregioes_2022_albers_100m.tif
