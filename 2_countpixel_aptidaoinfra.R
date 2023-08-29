@@ -18,8 +18,8 @@ tryCatch({
 
 dbSendQuery(connec_local, "
             
-DROP TABLE IF EXISTS public.teeb_aptinfra_imovel_100m; 
-CREATE TABLE public.teeb_aptinfra_imovel_100m (
+DROP TABLE IF EXISTS public.teeb_aptinfra_imovel_100m_final; 
+CREATE TABLE public.teeb_aptinfra_imovel_100m_final (
 
 id serial4 NOT NULL,
 idcar_imaflora integer NULL,
@@ -30,12 +30,12 @@ area_ha float8 NULL
 );
 
 
-CREATE INDEX teeb_aptinfra_imovel_100m_id_idx ON public.teeb_aptinfra_imovel_100m USING btree (id);
-CREATE INDEX teeb_aptinfra_imovel_100m_idcar_imaflora_idx ON public.teeb_aptinfra_imovel_100m USING btree (idcar_imaflora);
-CREATE INDEX teeb_aptinfra_imovel_100m_mesoregiao_idx ON public.teeb_aptinfra_imovel_100m USING btree (mesoregiao);
+CREATE INDEX teeb_aptinfra_imovel_100m_final_id_idx ON public.teeb_aptinfra_imovel_100m_final USING btree (id);
+CREATE INDEX teeb_aptinfra_imovel_100m_final_idcar_imaflora_idx ON public.teeb_aptinfra_imovel_100m_final USING btree (idcar_imaflora);
+CREATE INDEX teeb_aptinfra_imovel_100m_final_mesoregiao_idx ON public.teeb_aptinfra_imovel_100m_final USING btree (mesoregiao);
             ")
 
-idcar_imaflora <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_albers_imovel_100m.tif"); idcar_imaflora;
+idcar_imaflora <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_albers_imovel_100m_final.tif"); idcar_imaflora;
 mesoregiao <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/mesorregioes_BR_albers_100m.tif"); mesoregiao;
 aptidao <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/csr_100m_albers.tif"); aptidao;
 infra <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/br_indicador_infra_100m_albers.tif"); infra; 
@@ -55,7 +55,7 @@ for (i in 1:bss$n) {
     group_by(mesoregiao,idcar_imaflora,aptidao,infra) %>%
     summarise(area_ha = n()*1.0) %>% as_tibble() 
   
-  dbWriteTable(connec_local, 'teeb_aptinfra_imovel_100m', x, row.names = F, append = T)
+  dbWriteTable(connec_local, 'teeb_aptinfra_imovel_100m_final', x, row.names = F, append = T)
   
   cat('Escrito i = ', i)
   
