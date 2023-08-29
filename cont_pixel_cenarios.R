@@ -40,10 +40,10 @@ CREATE INDEX teeb_cpixels_cenarios_mesoregiao_idx ON public.teeb_cpixels_cenario
 
 
 
-idcar_imaflora <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_albers_imovel_100m.tif"); idcar_imaflora;
+idcar_imaflora <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_albers_imovel_100m_final.tif"); idcar_imaflora;
 mesoregiao <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/mesorregioes_BR_albers_100m.tif"); mesoregiao;
-cenario1 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pastagens_degradadas_S1_2030.tif");  cenario1;
-cenario2 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pastagens_degradadas_S2_2030.tif") ; cenario2;
+cenario1 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pastagens_degradadas_S1_2030_vfinal.tif");  cenario1;
+cenario2 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pastagens_degradadas_S2_2030_vfinal.tif") ; cenario2;
 
 
 bss <- blockSize(mesoregiao); bss$n
