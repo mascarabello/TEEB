@@ -100,9 +100,9 @@ SELECT * FROM teeb.teeb_creditorural_microrregiao
 select * FROM teeb.imoveis_regioesterm 
 --where cd_micro = 35061 order by vmedio asc
 
--- 24 m
-DROP TABLE IF EXISTS teeb.teeb_creditorural_microrregiao_regiaoterm;
-CREATE TABLE teeb.teeb_creditorural_microrregiao_regiaoterm AS 
+-- 27 min 55 secs.
+DROP TABLE IF EXISTS teeb.teeb_creditorural_microrregiao_uf;
+CREATE TABLE teeb.teeb_creditorural_microrregiao_uf AS 
 WITH foo2 AS (
 SELECT
 a.cd_uf,
@@ -123,26 +123,38 @@ cd_micro,
 ctamprop,
 valortotal,
 vmedio,
-max(vmedio) OVER(PARTITION BY regioes_term,ctamprop ) as max_vmedio
+max(vmedio) OVER(PARTITION BY cd_uf,ctamprop ) as max_vmedio
 FROM foo2
 GROUP BY cd_uf, regioes_term, cd_mun, cd_micro, ctamprop, valortotal, vmedio
 
-select * from teeb.teeb_creditorural_microrregiao_regiaoterm 
+select * from teeb.teeb_creditorural_microrregiao_uf 
 
+
+--- tirando o outlier da região de SP
+select * from teeb.teeb_creditorural_microrregiao_uf  where (cd_uf = 35 AND ctamprop = 'GRANDE') order by vmedio desc
+UPDATE teeb.teeb_creditorural_microrregiao_uf 
+   SET max_vmedio = 57397218 WHERE (cd_uf = 35 AND ctamprop = 'GRANDE')
 
 -- Adicionando a coluna indicador por microregião
-ALTER TABLE teeb.teeb_creditorural_microrregiao_regiaoterm ADD COLUMN indicador float8 NULL;
+ALTER TABLE teeb.teeb_creditorural_microrregiao_uf ADD COLUMN indicador float8 NULL;
 
-UPDATE teeb.teeb_creditorural_microrregiao_regiaoterm 
+UPDATE teeb.teeb_creditorural_microrregiao_uf 
    SET indicador = vmedio/max_vmedio
 
-select * from teeb.teeb_creditorural_microrregiao_regiaoterm WHERE cd_micro = 31023
+UPDATE teeb.teeb_creditorural_microrregiao_uf 
+   SET indicador = CASE WHEN indicador > 1.0 THEN 1.0
+       ELSE indicador
+	   END
+
+select * from teeb.teeb_creditorural_microrregiao_uf WHERE cd_micro = 31023
 
 
-select * from teeb.teeb_creditorural_microrregiao_regiaoterm WHERE cd_micro = 31023
-select * from teeb.teeb_creditorural_microrregiao_regiaoterm LIMIT 10
+select * from teeb.teeb_creditorural_microrregiao_uf WHERE cd_micro = 31023
+select * from teeb.teeb_creditorural_microrregiao_uf LIMIT 10
 
 select * from teeb.imoveis_regioesterm -- 6061633
+
+
 drop table if exists teeb.teeb_indice_credito;
 CREATE TABLE teeb.teeb_indice_credito AS
 WITH foo3 AS (
@@ -172,7 +184,7 @@ b.tamanho,
 b.ctamprop,
 c.indicador
 FROM foo3 b
-   LEFT JOIN teeb.teeb_creditorural_microrregiao_regiaoterm c
+   LEFT JOIN teeb.teeb_creditorural_microrregiao_uf c
    on (b.cd_mun=c.cd_mun AND b.ctamprop=c.ctamprop AND b.regioes_term=c.regioes_term)
 GROUP BY b.gid, b.cd_mun, c.cd_micro, b.cd_uf, b.sub_class, b.regioes_term, b.tamanho, b.ctamprop, c.indicador
 
@@ -191,6 +203,6 @@ valortotal,
 vmedio,
 max_vmedio,
 indicador
-FROM teeb.teeb_creditorural_microrregiao_regiaoterm 
-WHERE ctamprop = 'PEQUENO'
+FROM teeb.teeb_creditorural_microrregiao_uf 
+WHERE ctamprop = 'MEDIO'
 GROUP BY cd_uf, regioes_term, cd_mun, cd_micro, ctamprop, valortotal, vmedio, max_vmedio,indicador
