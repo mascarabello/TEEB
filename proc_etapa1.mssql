@@ -25,6 +25,7 @@ select * FROM teeb.input_termbr_rpd_cen1_cen2
 -- Apagando a tabela do schema public
 DROP TABLE IF EXISTS public.input_termbr_rpd_cen1_cen2 ;
 
+
 -- Conferindo as metas 
 select 
 sum(area_rpd_cen1)/1000000 as areardpcen1, 
@@ -34,6 +35,61 @@ FROM teeb.input_termbr_rpd_cen1_cen2
 
 select * FROM teeb.input_termbr_rpd_cen1_cen2
 
+
+-- Meta Calculada a partir dos dados 
+DROP TABLE IF EXISTS teeb.metauf_rpd_cen1_cen2;
+CREATE TABLE teeb.metauf_rpd_cen1_cen2 AS
+WITH foo as(
+select 
+substring(mesoregiao::text, 1, 2)::int as cd_uf,
+sum(area_ha) as area_pd
+FROM teeb.teeb_qp2020_imovel_100m_final
+WHERE qualipast_2020 = '1' OR qualipast_2020 = '2'
+group by cd_uf)
+SELECT 
+cd_uf,
+CASE 
+    WHEN cd_uf = 11  THEN 'RO'
+    WHEN cd_uf = 12  THEN 'AMACRR'
+    WHEN cd_uf = 13  THEN 'AMACRR'
+	WHEN cd_uf = 14  THEN 'AMACRR'
+	WHEN cd_uf = 15  THEN 'PAAP'	
+	WHEN cd_uf = 16  THEN 'PAAP'	
+	WHEN cd_uf = 17  THEN 'MATO'	
+	WHEN cd_uf = 21  THEN 'MATO'	
+	WHEN cd_uf = 22  THEN 'PIBA'	
+	WHEN cd_uf = 23  THEN 'RestanteNE'
+	WHEN cd_uf = 24  THEN 'RestanteNE'	
+	WHEN cd_uf = 25  THEN 'RestanteNE'
+	WHEN cd_uf = 26  THEN 'RestanteNE'	
+	WHEN cd_uf = 27  THEN 'RestanteNE'
+	WHEN cd_uf = 28  THEN 'RestanteNE'	
+	WHEN cd_uf = 29  THEN 'PIBA'		
+	WHEN cd_uf = 31  THEN 'MG'			
+	WHEN cd_uf = 32  THEN 'RestanteSE'			
+	WHEN cd_uf = 33  THEN 'RestanteSE'			
+	WHEN cd_uf = 35  THEN 'SP'				
+	WHEN cd_uf = 41  THEN 'PR'					
+	WHEN cd_uf = 42  THEN 'RestanteSUL'					
+	WHEN cd_uf = 43  THEN 'RestanteSUL'					
+	WHEN cd_uf = 50  THEN 'MS'
+	WHEN cd_uf = 51  THEN 'MT'	
+	WHEN cd_uf = 52  THEN 'GODF'	
+	WHEN cd_uf = 53  THEN 'GODF'	
+END as regioes,
+area_pd
+FROM foo
+WHERE cd_uf is not null
+GROUP BY cd_uf, area_pd
+
+select * FROM teeb.metauf_rpd_cen1_cen2
+select sum(area_pd) FROM teeb.metauf_rpd_cen1_cen2 --102841535
+
+ALTER TABLE teeb.metauf_rpd_cen1_cen2 ADD COLUMN area_rpd_cen1 float8;
+UPDATE teeb.metauf_rpd_cen1_cen2 
+   SET area_rpd_cen1 = (area_pd/102841535)*30000000
+   
+   
 
 -- PARTE 2: calcular a proporcao de pastagem degradada por imovel e faixa de tamanho
 /* 

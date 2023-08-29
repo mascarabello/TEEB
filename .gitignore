@@ -45,3 +45,6 @@ resultados_alocacaorpd/S2_2030_restaurado.tfw
 resultados_alocacaorpd/S2_2030_restaurado.tif
 resultados_alocacaorpd/S2_2030_restauradov2.tfw
 resultados_alocacaorpd/S2_2030_restauradov2.tif
+*.gpkg
+*.tif
+*.xml
