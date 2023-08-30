@@ -89,7 +89,7 @@ GROUP BY a.idcar_imaflora, a.cd_mun, a.cd_uf, a.regioes_term, a.tamanho, a.area_
 
 select * from teeb.meta_cen1 limit 10
 
-select * from teeb.results_cen1_final limit 10
+select * from teeb.results_cen1_final where cd_uf= 15
 
 
 -- 1 min
@@ -104,7 +104,7 @@ from teeb.results_cen1_final as a,
 where a.idcar_imaflora = b.gid
 
 select * FROM  teeb.pa_br_landtenure_v202105_albers_imovel limit 10
-select sum(area_pd)/1000000 FROM teeb.results_cen1_final WHERE recuperar = '3'
+select sum(area_pd)/1000000 FROM teeb.results_cen1_final WHERE recuperar = '3' AND cd_uf= 16
 
 
 select * from teeb.results_cen1_final_geom 

@@ -11,6 +11,12 @@ select sum(area_ha) as area_c2
 FROM teeb.teeb_cpixels_cenarios
 where cenario2 = '100' OR cenario2 = '1000'
 
+
+select sum(area_ha) as area_c2
+FROM teeb.teeb_cpixels_cenarios
+where (cenario2 = '100' OR cenario2 = '1000') AND substring(mesoregiao::text, 1, 2)::int=16 --7609067
+
+
 SELECT * FROM teeb.teeb_cpixels_cenarios
 
 
@@ -47,6 +53,9 @@ FROM teeb.results_cen2 as a,
 WHERE a.idcar_imaflora = b.gid
 
 select sum(area_pd) FROM teeb.results_cen2_rank where idcar_imaflora != 0.0 -- 61504273
+select sum(area_pd) FROM teeb.results_cen2_rank where cd_uf = 16
+
+
 
 DROP TABLE IF EXISTS teeb.results_cen2_final;
 CREATE TABLE teeb.results_cen2_final AS 
@@ -87,7 +96,12 @@ UPDATE teeb.results_cen2_final
    END;
 
 
-select sum(area_pd)/1000000 FROM teeb.results_cen2_final WHERE recuperar = '3'
+select cd_uf,recuperar, sum(area_pd) FROM teeb.results_cen2_final WHERE recuperar in ('2','3') and cd_uf in (15,16) group by cd_uf, recuperar
+
+select sum(area_pd) FROM teeb.results_cen2_final WHERE cd_uf = 16 and recuperar in ('2','3')
+
+order by posicao2
+
 
 DROP TABLE IF EXISTS teeb.results_cen2_final_geom;
 CREATE TABLE teeb.results_cen2_final_geom AS 
