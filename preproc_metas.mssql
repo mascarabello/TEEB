@@ -219,9 +219,19 @@ UPDATE teeb.metauf_rpd_cen2 as t
 ALTER TABLE teeb.metauf_rpd_cen2 ADD COLUMN area_rpdilp_cen2 float8;
 UPDATE teeb.metauf_rpd_cen2 set area_rpdilp_cen2 = perc_agri* area_ilp_term;
 
+UPDATE teeb.metauf_rpd_cen2 set area_rpdilp_cen2 = 0 WHERE cd_uf = 16;
+UPDATE teeb.metauf_rpd_cen2 set area_rpdilp_cen2 = 59310 WHERE cd_uf = 15;
+
 
 ALTER TABLE teeb.metauf_rpd_cen2 ADD COLUMN area_rpdrest_cen2 float8;
-UPDATE teeb.metauf_rpd_cen2 set area_rpdrest_cen2 = area_rpd_total - area_rpdilp_cen2;
+UPDATE teeb.metauf_rpd_cen2 set area_rpdrest_cen2 = 
+   case when area_rpd_total < area_rpdilp_cen2 THEN 0
+        ELSE area_rpd_total - area_rpdilp_cen2
+	end;
+   
 
-SELECT * FROM teeb.metauf_rpd_cen2
-SELECT * FROM teeb.metauf_rpd_cen1
+SELECT * FROM teeb.metauf_rpd_cen2 where cd_uf in (15,16)
+SELECT * FROM teeb.metauf_rpd_cen1 where cd_uf in (15,16)
+
+
+SELECT * FROM teeb.metauf_rpd_cen2 where confere_ilp < 0.0
