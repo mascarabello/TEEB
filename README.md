@@ -10,7 +10,8 @@ preproc_reproj_qpastagem : codigo para reprojetar o dado de qualidade de pastage
 para albers com resolucao 100m
 
 
-1_countpixel_qp2020 : contagem de pixel 
+1_countpixel_qp2020 : contagem de pixel de qualidade de pastagem
+cont_pixel_cenarios
 
 
 
