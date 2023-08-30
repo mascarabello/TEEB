@@ -22,8 +22,8 @@ error=function(cond) {
 
 dbSendQuery(connec_local, "
             
-DROP TABLE IF EXISTS public.teeb_cpixels_cenarios_rpdalocadav3; 
-CREATE TABLE public.teeb_cpixels_cenarios_rpdalocadav3 (
+DROP TABLE IF EXISTS public.teeb_cpixels_cenarios_rpdalocada_vfinal; 
+CREATE TABLE public.teeb_cpixels_cenarios_rpdalocada_vfinal (
 
 id serial4 NOT NULL,
 idcar_imaflora integer NULL,
@@ -34,18 +34,17 @@ area_ha float8 NULL
 );
 
 
-CREATE INDEX teeb_cpixels_cenarios_rpdalocadav3_id_idx ON public.teeb_cpixels_cenarios_rpdalocadav3 USING btree (id);
-CREATE INDEX teeb_cpixels_cenarios_rpdalocadav3_idcar_imaflora_idx ON public.teeb_cpixels_cenarios_rpdalocadav3 USING btree (idcar_imaflora);
-CREATE INDEX teeb_cpixels_cenarios_rpdalocadav3_mesoregiao_idx ON public.teeb_cpixels_cenarios_rpdalocadav3 USING btree (mesoregiao);
+CREATE INDEX teeb_cpixels_cenarios_rpdalocada_vfinal_id_idx ON public.teeb_cpixels_cenarios_rpdalocada_vfinal USING btree (id);
+CREATE INDEX teeb_cpixels_cenarios_rpdalocada_vfinal_idcar_imaflora_idx ON public.teeb_cpixels_cenarios_rpdalocada_vfinal USING btree (idcar_imaflora);
+CREATE INDEX teeb_cpixels_cenarios_rpdalocada_vfinal_mesoregiao_idx ON public.teeb_cpixels_cenarios_rpdalocada_vfinal USING btree (mesoregiao);
             ")
 
 
 
-idcar_imaflora <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_albers_imovel_100m.tif"); idcar_imaflora;
-#mesoregiao <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/mesorregioes_BR_albers_100m.tif"); mesoregiao;
-mesoregiao <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/BR_Mesorregioes_2022_albers_100m.tif"); mesoregiao; ## mesoregião 'nova'
-cenario1 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/S1_2030_restauradov2.tif"); cenario1;
-cenario2 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/S2_2030_restauradov2.tif"); cenario2;
+idcar_imaflora <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_albers_imovel_100m_final.tif"); idcar_imaflora;
+mesoregiao <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/mesorregioes_BR_albers_100m.tif"); mesoregiao;
+cenario1 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/S1_2030_restaurado_vfinal.tif"); cenario1;
+cenario2 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/S2_2030_restaurado_vfinal.tif"); cenario2;
 
 
 bss <- blockSize(mesoregiao); bss$n
@@ -61,7 +60,7 @@ for (i in 1:bss$n) {
     group_by(mesoregiao,idcar_imaflora, cenario1,cenario2) %>%
     summarise(area_ha = n()*1.0) %>% as_tibble()  ## 100 x 100
   
-  dbWriteTable(connec_local, 'teeb_cpixels_cenarios_rpdalocadav3', x, row.names = F, append = T)
+  dbWriteTable(connec_local, 'teeb_cpixels_cenarios_rpdalocada_vfinal', x, row.names = F, append = T)
   
   cat('Escrito i = ', i)
   
