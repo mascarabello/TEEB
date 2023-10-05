@@ -30,7 +30,7 @@ GROUP BY idcar_imaflora
 
 
 select * FROM teeb.results_cen2
-select sum(area_pd) FROM teeb.results_cen2 where idcar_imaflora != 0.0  -- 61860939
+select sum(area_pd) FROM teeb.results_cen2 where idcar_imaflora != 0.0  -- 61439396
 
 DROP TABLE IF EXISTS teeb.results_cen2_rank;
 CREATE TABLE teeb.results_cen2_rank AS 
@@ -52,7 +52,7 @@ FROM teeb.results_cen2 as a,
      teeb.teeb_indicadores_rank as b
 WHERE a.idcar_imaflora = b.gid
 
-select sum(area_pd) FROM teeb.results_cen2_rank where idcar_imaflora != 0.0 -- 61504273
+select sum(area_pd) FROM teeb.results_cen2_rank where idcar_imaflora != 0.0 -- 61089365
 select sum(area_pd) FROM teeb.results_cen2_rank where cd_uf = 16
 
 
@@ -117,10 +117,10 @@ select sum(area_pd)/1000000 FROM teeb.results_cen2_final WHERE recuperar = '3'
 
 
 -- Download do dado do DB no terminal [GDAL] -rodando
-/* ogr2ogr -f GPKG -t_srs "+proj=aea +lat_1=-2 +lat_2=-22 +lat_0=-12 +lon_0=-54 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs" /Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen2_final_geom_albers.gpkg "PG:host=localhost user=postgres dbname=postgres password=postgres" -sql "SELECT * FROM teeb.results_cen2_final_geom" 
+/* ogr2ogr -f GPKG -t_srs "+proj=aea +lat_1=-2 +lat_2=-22 +lat_0=-12 +lon_0=-54 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs" /Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen2_final_geom_albers_13set23.gpkg "PG:host=localhost user=postgres dbname=postgres password=postgres" -sql "SELECT * FROM teeb.results_cen2_final_geom" 
 */
 
 -- Rasterizar o gpkg [GDAL] - 
-/* gdal_rasterize -ot "UInt32" -te -2178091.5413726898841560 -2385764.0860471501946449 2610358.4586273101158440 1902825.9139528500381857 -a_srs "+proj=aea +lat_1=-2 +lat_2=-22 +lat_0=-12 +lon_0=-54 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"  -co "COMPRESS=DEFLATE" -co "BIGTIFF=IF_SAFER" -co "NUM_THREADS=4"   /Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen2_final_geom_albers.gpkg -tr 100 100 -a recuperar -a_nodata 1 /Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen2_final_geom_albers_100m_vfinal.tif
+/* gdal_rasterize -ot "UInt32" -te -2178091.5413726898841560 -2385764.0860471501946449 2610358.4586273101158440 1902825.9139528500381857 -a_srs "+proj=aea +lat_1=-2 +lat_2=-22 +lat_0=-12 +lon_0=-54 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"  -co "COMPRESS=DEFLATE" -co "BIGTIFF=IF_SAFER" -co "NUM_THREADS=4"   /Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen2_final_geom_albers_13set23.gpkg -tr 100 100 -a recuperar -a_nodata 1 /Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen2_final_geom_albers_100m_13set23.tif
 */
 
