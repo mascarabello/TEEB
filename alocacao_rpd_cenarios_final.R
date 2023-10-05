@@ -16,9 +16,9 @@ library(terra)
 
 
 # CENÁRIO 1 ---------------------------------------------------------------
-cenario1 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pastagens_degradadas_S1_2030_vfinal.tif");cenario1;
-restcen1 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen1_final_geom_albers_100m_vfinal.tif"); restcen1;
-out <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pastagens_degradadas_S1_2030_vfinal.tif")  
+cenario1 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pa_br_lulcs1_gpp_100m_2030.tif");cenario1;
+restcen1 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen1_final_geom_albers_100m_13set23.tif"); restcen1;
+out <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pa_br_lulcs1_gpp_100m_2030.tif");
 
 # Marking pasture pixels in LAPIG as pasture in MAPBIOMAS
 bss <- blockSize(cenario1)
@@ -26,7 +26,7 @@ bss <- blockSize(cenario1)
 cenario1 <- readStart(cenario1)
 restcen1 <- readStart(restcen1)
 out <- readStart(out)
-out <- writeStart(out, filename = "/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/S1_2030_restaurado_vfinal.tif",format = 'Gtiff',overwrite=TRUE,options=c("COMPRESS=DEFLATE","ZLEVEL=9","PREDICTOR=2","TFW=YES"))
+out <- writeStart(out, filename = "/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/pa_br_lulcs1_restaurado_gpp_100m_2030.tif",format = 'Gtiff',overwrite=TRUE,options=c("COMPRESS=DEFLATE","ZLEVEL=9","PREDICTOR=2","TFW=YES"))
 
 bss$n
 for(i in 1:bss$n) {
@@ -51,9 +51,9 @@ readStop(restcen1)
 
 # CENÁRIO 2 ---------------------------------------------------------------
 
-cenario2 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pastagens_degradadas_S2_2030_vfinal.tif");cenario2;
-restcen2 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen2_final_geom_albers_100m_vfinal.tif"); restcen2;
-out2 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pastagens_degradadas_S2_2030_vfinal.tif")  
+cenario2 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pa_br_lulcs2_gpp_100m_2030.tif");cenario2;
+restcen2 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/results_cen2_final_geom_albers_100m_13set23.tif"); restcen2;
+out2 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pa_br_lulcs2_gpp_100m_2030.tif")  
 
 # Marking pasture pixels in LAPIG as pasture in MAPBIOMAS
 bss <- blockSize(cenario2)
@@ -61,7 +61,7 @@ bss <- blockSize(cenario2)
 cenario2 <- readStart(cenario2)
 restcen2 <- readStart(restcen2)
 out2 <- readStart(out2)
-out2 <- writeStart(out2, filename = "/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/S2_2030_restaurado_vfinal.tif",format = 'Gtiff',overwrite=TRUE,options=c("COMPRESS=DEFLATE","ZLEVEL=9","PREDICTOR=2","TFW=YES"))
+out2 <- writeStart(out2, filename = "/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/pa_br_lulcs2_restaurado_gpp_100m_2030.tif",format = 'Gtiff',overwrite=TRUE,options=c("COMPRESS=DEFLATE","ZLEVEL=9","PREDICTOR=2","TFW=YES"))
 bss$n
 for(i in 1:bss$n) {
   x <- getValues(cenario2, row = bss$row[i], nrows = bss$nrows[i])
