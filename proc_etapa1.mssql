@@ -102,6 +102,13 @@ FROM teeb.teeb_qp2020_imovel_100m_final
 group by qualipast_2020
 -- os números batem com os dados do lapig
 
+
+
+select substring(mesoregiao::text, 1, 2)::int as cd_uf,  sum(area_ha) as area_ha 
+FROM teeb.teeb_qp2020_imovel_100m_final
+WHERE qualipast_2020 = '1' OR qualipast_2020 = '2'
+group by cd_uf
+
 --where substring(cd_mun::text, 1, 2)::int = 29
 select * from teeb.imoveis_regioesterm   
 /* Junção da tabela de qualidade de pastagem com informações de regiões do TERM-BR */
@@ -141,7 +148,7 @@ cd_uf, sum(area_pastdegradada) as area_pd_uf
 FROM teeb.teeb_pdegradada2020_imovel_tamanho_regiao  
 GROUP BY cd_uf
 
-select * from teeb.teeb_pdegradada2020_uf; 
+select * from teeb.teeb_pdegradada2020_uf order by cd_uf ; 
 
 select * from teeb.teeb_pdegradada2020_imovel_tamanho_regiao; 
 
