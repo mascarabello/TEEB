@@ -20,8 +20,8 @@ tryCatch({
 
 dbSendQuery(connec_local, "
             
-DROP TABLE IF EXISTS public.teeb_bau; 
-CREATE TABLE public.teeb_bau (
+DROP TABLE IF EXISTS public.teeb_projbau; 
+CREATE TABLE public.teeb_projbau (
 
 id serial4 NOT NULL,
 idcar_imaflora integer NULL,
@@ -31,14 +31,14 @@ area_ha float8 NULL
 );
 
 
-CREATE INDEX teeb_bau_id_idx ON public.teeb_bau USING btree (id);
-CREATE INDEX teeb_bau_idcar_imaflora_idx ON public.teeb_bau USING btree (idcar_imaflora);
-CREATE INDEX teeb_bau_mesoregiao_idx ON public.teeb_bau USING btree (mesoregiao);
+CREATE INDEX teeb_projbau_id_idx ON public.teeb_projbau USING btree (id);
+CREATE INDEX teeb_projbau_idcar_imaflora_idx ON public.teeb_projbau USING btree (idcar_imaflora);
+CREATE INDEX teeb_projbau_mesoregiao_idx ON public.teeb_projbau USING btree (mesoregiao);
             ")
 
 idcar_imaflora <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_albers_imovel_100m_final.tif"); idcar_imaflora;
 mesoregiao <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/mesorregioes_BR_albers_100m.tif"); mesoregiao;
-bau <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/use_reclassified_2020_merge_lapig_mapbiomas_cmp.tif"); bau;
+bau <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pastagens_degradadas_BAU_2030.tif"); bau;
 
 
 bss <- blockSize(mesoregiao); bss$n
@@ -54,7 +54,7 @@ for (i in 1:bss$n) {
     group_by(mesoregiao,idcar_imaflora,bau) %>%
     summarise(area_ha = n()*1.0) %>% as_tibble() 
   
-  dbWriteTable(connec_local, 'teeb_bau', x, row.names = F, append = T)
+  dbWriteTable(connec_local, 'teeb_projbau', x, row.names = F, append = T)
   
   cat('Escrito i = ', i)
   
