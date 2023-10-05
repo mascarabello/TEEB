@@ -21,8 +21,8 @@ error=function(cond) {
 
 dbSendQuery(connec_local, "
             
-DROP TABLE IF EXISTS public.teeb_cpixels_cenarios; 
-CREATE TABLE public.teeb_cpixels_cenarios (
+DROP TABLE IF EXISTS public.teeb_cpixels_cenarios_v13set23_es; 
+CREATE TABLE public.teeb_cpixels_cenarios_v13set23_es (
 
 id serial4 NOT NULL,
 idcar_imaflora integer NULL,
@@ -33,17 +33,17 @@ area_ha float8 NULL
 );
 
 
-CREATE INDEX teeb_cpixels_cenarios_id_idx ON public.teeb_cpixels_cenarios USING btree (id);
-CREATE INDEX teeb_cpixels_cenarios_idcar_imaflora_idx ON public.teeb_cpixels_cenarios USING btree (idcar_imaflora);
-CREATE INDEX teeb_cpixels_cenarios_mesoregiao_idx ON public.teeb_cpixels_cenarios USING btree (mesoregiao);
+CREATE INDEX teeb_cpixels_cenarios_v13set23_es_id_idx ON public.teeb_cpixels_cenarios_v13set23_es USING btree (id);
+CREATE INDEX teeb_cpixels_cenarios_v13set23_es_idcar_imaflora_idx ON public.teeb_cpixels_cenarios_v13set23_es USING btree (idcar_imaflora);
+CREATE INDEX teeb_cpixels_cenarios_v13set23_es_mesoregiao_idx ON public.teeb_cpixels_cenarios_v13set23_es USING btree (mesoregiao);
             ")
 
 
 
 idcar_imaflora <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_albers_imovel_100m_final.tif"); idcar_imaflora;
 mesoregiao <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/mesorregioes_BR_albers_100m.tif"); mesoregiao;
-cenario1 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pastagens_degradadas_S1_2030_vfinal.tif");  cenario1;
-cenario2 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pastagens_degradadas_S2_2030_vfinal.tif") ; cenario2;
+cenario1 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pa_br_lulcs1_gpp_100m_2030.tif");  cenario1;
+cenario2 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/proj_espacial/pa_br_lulcs2_gpp_100m_2030.tif") ; cenario2;
 
 
 bss <- blockSize(mesoregiao); bss$n
@@ -59,7 +59,7 @@ for (i in 1:bss$n) {
     group_by(mesoregiao,idcar_imaflora, cenario1,cenario2) %>%
     summarise(area_ha = n()*1.0) %>% as_tibble()  ## 100 x 100
   
-  dbWriteTable(connec_local, 'teeb_cpixels_cenarios', x, row.names = F, append = T)
+  dbWriteTable(connec_local, 'teeb_cpixels_cenarios_v13set23_es', x, row.names = F, append = T)
   
   cat('Escrito i = ', i)
   
