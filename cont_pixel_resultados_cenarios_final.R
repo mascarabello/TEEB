@@ -22,8 +22,8 @@ error=function(cond) {
 
 dbSendQuery(connec_local, "
             
-DROP TABLE IF EXISTS public.teeb_cpixels_cenarios_rpdalocada_vfinal; 
-CREATE TABLE public.teeb_cpixels_cenarios_rpdalocada_vfinal (
+DROP TABLE IF EXISTS public.teeb_cpixels_cenarios_rpdalocada_v13set23_es; 
+CREATE TABLE public.teeb_cpixels_cenarios_rpdalocada_v13set23_es (
 
 id serial4 NOT NULL,
 idcar_imaflora integer NULL,
@@ -34,17 +34,17 @@ area_ha float8 NULL
 );
 
 
-CREATE INDEX teeb_cpixels_cenarios_rpdalocada_vfinal_id_idx ON public.teeb_cpixels_cenarios_rpdalocada_vfinal USING btree (id);
-CREATE INDEX teeb_cpixels_cenarios_rpdalocada_vfinal_idcar_imaflora_idx ON public.teeb_cpixels_cenarios_rpdalocada_vfinal USING btree (idcar_imaflora);
-CREATE INDEX teeb_cpixels_cenarios_rpdalocada_vfinal_mesoregiao_idx ON public.teeb_cpixels_cenarios_rpdalocada_vfinal USING btree (mesoregiao);
+CREATE INDEX teeb_cpixels_cenarios_rpdalocada_v13set23_es_id_idx ON public.teeb_cpixels_cenarios_rpdalocada_v13set23_es USING btree (id);
+CREATE INDEX teeb_cpixels_cenarios_rpdalocada_v13set23_es_idcar_imaflora_idx ON public.teeb_cpixels_cenarios_rpdalocada_v13set23_es USING btree (idcar_imaflora);
+CREATE INDEX teeb_cpixels_cenarios_rpdalocada_v13set23_es_mesoregiao_idx ON public.teeb_cpixels_cenarios_rpdalocada_v13set23_es USING btree (mesoregiao);
             ")
 
 
 
 idcar_imaflora <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/landtenure_v202105_albers_imovel_100m_final.tif"); idcar_imaflora;
 mesoregiao <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/dados/processados/mesorregioes_BR_albers_100m.tif"); mesoregiao;
-cenario1 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/S1_2030_restaurado_vfinal.tif"); cenario1;
-cenario2 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/S2_2030_restaurado_vfinal.tif"); cenario2;
+cenario1 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/pa_br_lulcs1_restaurado_gpp_100m_2030.tif"); cenario1;
+cenario2 <- raster("/Users/marlucescarabello/Documents/GitHub/TEEB/resultados_alocacaorpd/pa_br_lulcs2_restaurado_gpp_100m_2030.tif"); cenario2;
 
 
 bss <- blockSize(mesoregiao); bss$n
@@ -60,7 +60,7 @@ for (i in 1:bss$n) {
     group_by(mesoregiao,idcar_imaflora, cenario1,cenario2) %>%
     summarise(area_ha = n()*1.0) %>% as_tibble()  ## 100 x 100
   
-  dbWriteTable(connec_local, 'teeb_cpixels_cenarios_rpdalocada_vfinal', x, row.names = F, append = T)
+  dbWriteTable(connec_local, 'teeb_cpixels_cenarios_rpdalocada_v13set23_es', x, row.names = F, append = T)
   
   cat('Escrito i = ', i)
   
@@ -71,45 +71,3 @@ for (i in 1:bss$n) {
 
 dbDisconnect(connec_local)
 
-## check - cenário 1
-check_results_cen1 <- dbGetQuery(connec_local , "SELECT * FROM teeb_projections.check_resultados_rpdalocada_cen1")
-
-pdrecuperada <- check_results_cen1[which(check_results_cen1$cenario1 == '300' | check_results_cen1$cenario1 == '3000'),]
-sum(pdrecuperada$area_cen1)/1000000
-
-pdrecuperada <- check_results_cen1[which(check_results_cen1$cenario1 == '100' | check_results_cen1$cenario1 == '1000'),]
-sum(pdrecuperada$area_cen1)/1000000
-
-
-pdrecuperada <- check_results_cen1[which(check_results_cen1$cenario1 == '3' | check_results_cen1$cenario1 == '11' | check_results_cen1$cenario1 == '13'),]
-sum(pdrecuperada$area_cen1)/1000000
-
-pdrecuperada <- check_results_cen1[which(check_results_cen1$cenario1 == '3' | check_results_cen1$cenario1 == '11' | check_results_cen1$cenario1 == '13'),]
-sum(pdrecuperada$area_cen1)/1000000
-
-
-
-pdrecuperada <- check_results_cen1[which(check_results_cen1$cenario1 == '100' | check_results_cen1$cenario1 == '1000' |
-                                           check_results_cen1$cenario1 == '300' | check_results_cen1$cenario1 == '3000'),]
-sum(pdrecuperada$area_cen1)/1000000
-
-## check - cenário 2
-check_results_cen2 <- dbGetQuery(connec_local , "SELECT * FROM teeb_projections.check_resultados_rpdalocada_cen2")
-
-pdrecuperada <- check_results_cen2[which(check_results_cen2$cenario2 == '300' | check_results_cen2$cenario2 == '3000'),]
-sum(pdrecuperada$area_cen2)/1000000
-
-pdrecuperada <- check_results_cen2[which(check_results_cen2$cenario2 == '200' | check_results_cen2$cenario2 == '2000'),]
-sum(pdrecuperada$area_cen2)/1000000
-
-pdrecuperada <- check_results_cen2[which(check_results_cen2$cenario2 == '100' | check_results_cen2$cenario2 == '1000'),]
-sum(pdrecuperada$area_cen2)/1000000
-
-pdrecuperada <- check_results_cen2[which(check_results_cen2$cenario2 == '200' | check_results_cen2$cenario2 == '2000' |
-                                           check_results_cen2$cenario2 == '300' | check_results_cen2$cenario2 == '3000'),]
-sum(pdrecuperada$area_cen2)/1000000
-
-pdrecuperada <- check_results_cen2[which(check_results_cen2$cenario2 == '100' | check_results_cen2$cenario2 == '1000' |
-                                           check_results_cen2$cenario2 == '300' | check_results_cen2$cenario2 == '3000'|
-                                           check_results_cen2$cenario2 == '200' | check_results_cen2$cenario2 == '2000'),]
-sum(pdrecuperada$area_cen2)/1000000
