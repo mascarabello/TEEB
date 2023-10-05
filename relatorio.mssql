@@ -4,37 +4,223 @@ substring(a.mesoregiao::text, 1, 2)::int as cd_uf,
 --- VERSÃO ATUALIZADA DOS RESULTADOS
 -- USANDO TIFF DE MESORREGIAO RASTERIZADO DA MESMA FORMA QUE OS OUTROS (MALHA, RESULTADOS,...)
 
-SELECT * from PUBLIC.teeb_cpixels_cenarios_rpdalocadav3
+--- pastagem degradada por uf e região do term
+-- cen1
+DROP TABLE IF EXISTS teeb.report;
+CREATE TABLE teeb.report AS
+WITH foo as (SELECT 
+substring(b.mesoregiao::text, 1, 2)::int as cd_uf,
+CASE 
+ WHEN b.cenario1 = 100 or b.cenario1 = 1000 THEN 'Pastagem degradada' 			 
+ WHEN b.cenario1 = 200 or b.cenario1 = 2000 THEN 'Pastagem recuperada com iLP' 
+ WHEN b.cenario1 = 300 or b.cenario1 = 3000 THEN 'Pastagem recuperada' 
+ ELSE 'NON'
+end as classes_uso,
+sum(b.area_ha) as area_c1
+FROM teeb.teeb_cpixels_cenarios_rpdalocada_v13set23 as b
+	 GROUP BY b.mesoregiao, b.cenario1)
+select
+cd_uf,
+CASE 
+    WHEN cd_uf = 11  THEN 'RO'
+    WHEN cd_uf = 12  THEN 'AMACRR'
+    WHEN cd_uf = 13  THEN 'AMACRR'
+	WHEN cd_uf = 14  THEN 'AMACRR'
+	WHEN cd_uf = 15  THEN 'PAAP'	
+	WHEN cd_uf = 16  THEN 'PAAP'	
+	WHEN cd_uf = 17  THEN 'MATO'	
+	WHEN cd_uf = 21  THEN 'MATO'	
+	WHEN cd_uf = 22  THEN 'PIBA'	
+	WHEN cd_uf = 23  THEN 'RestanteNE'
+	WHEN cd_uf = 24  THEN 'RestanteNE'	
+	WHEN cd_uf = 25  THEN 'RestanteNE'
+	WHEN cd_uf = 26  THEN 'RestanteNE'	
+	WHEN cd_uf = 27  THEN 'RestanteNE'
+	WHEN cd_uf = 28  THEN 'RestanteNE'	
+	WHEN cd_uf = 29  THEN 'PIBA'		
+	WHEN cd_uf = 31  THEN 'MG'			
+	WHEN cd_uf = 32  THEN 'RestanteSE'			
+	WHEN cd_uf = 33  THEN 'RestanteSE'			
+	WHEN cd_uf = 35  THEN 'SP'				
+	WHEN cd_uf = 41  THEN 'PR'					
+	WHEN cd_uf = 42  THEN 'RestanteSUL'					
+	WHEN cd_uf = 43  THEN 'RestanteSUL'					
+	WHEN cd_uf = 50  THEN 'MS'
+	WHEN cd_uf = 51  THEN 'MT'	
+	WHEN cd_uf = 52  THEN 'GODF'	
+	WHEN cd_uf = 53  THEN 'GODF'	
+END regioes_term,
+sum(area_c1) as area_ha
+FROM foo 
+WHERE classes_uso != 'NON'
+GROUP BY cd_uf
 
-DROP TABLE IF EXISTS teeb.teeb_cpixels_cenarios_rpdalocadav3;
-CREATE TABLE teeb.teeb_cpixels_cenarios_rpdalocadav3 AS
-SELECT * FROM PUBLIC.teeb_cpixels_cenarios_rpdalocadav3
+select * from teeb.report
+
+
+-- cen2
+DROP TABLE IF EXISTS teeb.report;
+CREATE TABLE teeb.report AS
+WITH foo as (SELECT 
+substring(b.mesoregiao::text, 1, 2)::int as cd_uf,
+CASE 
+ WHEN b.cenario2 = 100 or b.cenario2 = 1000 THEN 'Pastagem degradada' 			 
+ WHEN b.cenario2 = 200 or b.cenario2 = 2000 THEN 'Pastagem recuperada com iLP' 
+ WHEN b.cenario2 = 300 or b.cenario2 = 3000 THEN 'Pastagem recuperada' 
+ ELSE 'NON'
+end as classes_uso,
+sum(b.area_ha) as area_c2
+FROM teeb.teeb_cpixels_cenarios_rpdalocada_v13set23 as b
+	 GROUP BY b.mesoregiao, b.cenario2)
+select
+cd_uf,
+CASE 
+    WHEN cd_uf = 11  THEN 'RO'
+    WHEN cd_uf = 12  THEN 'AMACRR'
+    WHEN cd_uf = 13  THEN 'AMACRR'
+	WHEN cd_uf = 14  THEN 'AMACRR'
+	WHEN cd_uf = 15  THEN 'PAAP'	
+	WHEN cd_uf = 16  THEN 'PAAP'	
+	WHEN cd_uf = 17  THEN 'MATO'	
+	WHEN cd_uf = 21  THEN 'MATO'	
+	WHEN cd_uf = 22  THEN 'PIBA'	
+	WHEN cd_uf = 23  THEN 'RestanteNE'
+	WHEN cd_uf = 24  THEN 'RestanteNE'	
+	WHEN cd_uf = 25  THEN 'RestanteNE'
+	WHEN cd_uf = 26  THEN 'RestanteNE'	
+	WHEN cd_uf = 27  THEN 'RestanteNE'
+	WHEN cd_uf = 28  THEN 'RestanteNE'	
+	WHEN cd_uf = 29  THEN 'PIBA'		
+	WHEN cd_uf = 31  THEN 'MG'			
+	WHEN cd_uf = 32  THEN 'RestanteSE'			
+	WHEN cd_uf = 33  THEN 'RestanteSE'			
+	WHEN cd_uf = 35  THEN 'SP'				
+	WHEN cd_uf = 41  THEN 'PR'					
+	WHEN cd_uf = 42  THEN 'RestanteSUL'					
+	WHEN cd_uf = 43  THEN 'RestanteSUL'					
+	WHEN cd_uf = 50  THEN 'MS'
+	WHEN cd_uf = 51  THEN 'MT'	
+	WHEN cd_uf = 52  THEN 'GODF'	
+	WHEN cd_uf = 53  THEN 'GODF'	
+END regioes_term,
+sum(area_c2) as area_ha
+FROM foo 
+WHERE classes_uso != 'NON'
+GROUP BY cd_uf
+
+
+select * from teeb.report
+
+--- AREA A SER RECUPERADA POR TAMANHO DE IMOVEL RURAL E REGIÃO
+-- C1
+DROP TABLE IF EXISTS teeb.report;
+CREATE TABLE teeb.report AS
+WITH foo as (SELECT 
+a.gid,	 
+substring(a.cd_mun::text, 1, 2)::int as cd_uf,
+CASE 
+-- WHEN b.cenario1 = 100 or b.cenario1 = 1000 THEN 'Pastagem degradada' 			 
+ WHEN b.cenario1 = 300 or b.cenario1 = 3000 THEN 'Pastagem recuperada' 
+ ELSE 'NON'
+end as classes_uso,
+sum(b.area_ha) as area_c1
+FROM teeb.teeb_cpixels_cenarios_rpdalocada_v13set23 as b,
+     teeb.pa_br_landtenure_v202105_albers_imovel as a	
+WHERE b.idcar_imaflora=a.gid 
+	 GROUP BY a.gid, a.cd_mun, b.cenario1)
+select
+c.cd_uf,
+d.regioes_term,
+d.tamanho,
+sum(c.area_c1) as area_ha
+FROM foo as c
+ left join teeb.imoveis_regioesterm as d on c.gid=d.gid
+ where classes_uso != 'NON' 
+GROUP BY c.cd_uf, d.regioes_term, d.tamanho,c.area_c1
+
+select * from teeb.report
+
+-- C2
+DROP TABLE IF EXISTS teeb.report;
+CREATE TABLE teeb.report AS
+WITH foo as (SELECT 
+a.gid,	 
+substring(a.cd_mun::text, 1, 2)::int as cd_uf,
+CASE 
+-- WHEN b.cenario2 = 100 or b.cenario2 = 1000 THEN 'Pastagem degradada' 
+-- WHEN b.cenario2 = 300 or b.cenario2 = 3000 THEN 'Pastagem recuperada' 
+ WHEN b.cenario2 = 200 or b.cenario2 = 2000 THEN 'Pastagem recuperada com iLP' 			 
+ ELSE 'NON'
+end as classes_uso,
+sum(b.area_ha) as area_c2
+FROM teeb.teeb_cpixels_cenarios_rpdalocada_v13set23 as b,
+     teeb.pa_br_landtenure_v202105_albers_imovel as a	
+WHERE b.idcar_imaflora=a.gid 
+	 GROUP BY a.gid, a.cd_mun, b.cenario2)
+select
+c.cd_uf,
+d.regioes_term,
+d.tamanho,
+sum(c.area_c2) as area_ha
+FROM foo as c
+ left join teeb.imoveis_regioesterm as d on c.gid=d.gid
+ where classes_uso != 'NON' 
+GROUP BY c.cd_uf, d.regioes_term, d.tamanho,c.area_c2
+
+select * from teeb.report
+
+-- discussao da alocacao
+-- 50% dos municípios - mt
+DROP TABLE IF EXISTS teeb.report;
+CREATE TABLE teeb.report AS
+SELECT 	 
+a.cd_mun,
+CASE 
+ WHEN b.cenario2 = 300 or b.cenario2 = 3000 THEN 'Pastagem recuperada' 
+ WHEN b.cenario2 = 200 or b.cenario2 = 2000 THEN 'Pastagem recuperada com iLP' 			 
+-- ELSE 'NON'
+end as classes_uso,
+sum(b.area_ha) as area_c2
+FROM teeb.teeb_cpixels_cenarios_rpdalocada_v13set23 as b,
+     teeb.pa_br_landtenure_v202105_albers_imovel as a	
+WHERE b.idcar_imaflora=a.gid AND substring(a.cd_mun::text, 1, 2)::int=51
+	 GROUP BY a.cd_mun, classes_uso, b.cenario2
+	 
+select * from teeb.report
+	 
+--- GO-52 / MS-50 / ba-29/ RS - 43 /pa - 15/ to - 17
+DROP TABLE IF EXISTS teeb.report;
+CREATE TABLE teeb.report AS
+SELECT 	 
+a.cd_mun,
+CASE 
+ WHEN b.cenario2 = 300 or b.cenario2 = 3000 THEN 'Pastagem recuperada' 
+ WHEN b.cenario2 = 200 or b.cenario2 = 2000 THEN 'Pastagem recuperada com iLP' 			 
+-- ELSE 'NON'
+end as classes_uso,
+sum(b.area_ha) as area_c2
+FROM teeb.teeb_cpixels_cenarios_rpdalocada_v13set23 as b,
+     teeb.pa_br_landtenure_v202105_albers_imovel as a	
+WHERE b.idcar_imaflora=a.gid AND substring(a.cd_mun::text, 1, 2)::int=17
+	 GROUP BY a.cd_mun, classes_uso, b.cenario2
+
+SELECT t.*, s.cd_micro  
+from teeb.report as t
+     left join teeb.mapeamento_micro_muni as s on t.cd_mun=s.cd_mun
+     WHERE t.classes_uso in ('Pastagem recuperada','Pastagem recuperada com iLP')
+
 
 select 
+substring(a.cd_mun::text, 1, 2)::int as cd_uf,
 CASE 
  WHEN b.cenario1 = 100 or b.cenario1 = 1000 THEN 'Pastagem degradada' 
  WHEN b.cenario1 = 300 or b.cenario1 = 3000 THEN 'Pastagem recuperada' 
  ELSE 'NON'
 end as classes_uso,
 sum(b.area_ha) as area_c1
-FROM teeb.teeb_cpixels_cenarios_rpdalocadav3 as b
-group by classes_uso
+FROM teeb.teeb_cpixels_cenarios_rpdalocada_v13set23 as b
+group by cd_uf, classes_uso
 
-/* v1
-"NON"	1991963487
-"Pastagem degradada"	31646766
-"Pastagem recuperada"	29985857
-
-
-v2
-"NON"	1972349546
-"Pastagem degradada"	51260707
-"Pastagem recuperada"	29985857
-
-V3
-"NON"	1972349546
-"Pastagem degradada"	51260707
-"Pastagem recuperada"	29985857 */
 
 SELECT 
 a.gid,	 
@@ -44,7 +230,7 @@ CASE
  ELSE 'NON'
 end as classes_uso,
 sum(b.area_ha) as area_c1
-FROM teeb.teeb_cpixels_cenarios_rpdalocadav3 as b,
+FROM teeb.teeb_cpixels_cenarios_rpdalocada_v13set23 as b,
      teeb.landtenure_v202105_4674_imovel as a	
 WHERE b.idcar_imaflora=a.gid AND (b.cenario1 = 300 or b.cenario1 = 3000)
 	 GROUP BY a.gid, a.cd_mun, b.cenario1
@@ -60,7 +246,7 @@ CASE
  ELSE 'NON'
 end as classes_uso,
 sum(b.area_ha) as area_c1
-FROM teeb.teeb_cpixels_cenarios_rpdalocadav3 as b,
+FROM teeb.teeb_cpixels_cenarios_rpdalocada_v13set23 as b,
      teeb.landtenure_v202105_4674_imovel as a	
 WHERE b.idcar_imaflora=a.gid 
 	 GROUP BY a.gid, a.cd_mun, b.cenario1)
@@ -222,7 +408,7 @@ CASE
  ELSE 'NON'
 end as classes_uso,
 sum(b.area_ha) as area_c2
-FROM teeb.teeb_cpixels_cenarios_rpdalocadav3 as b
+FROM teeb.teeb_cpixels_cenarios_rpdalocada_v13set23 as b
 	 GROUP BY b.mesoregiao, b.cenario2)
 select
 cd_uf,
