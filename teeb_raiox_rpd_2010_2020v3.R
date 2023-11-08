@@ -1,6 +1,6 @@
 #########################################################
 # Extração de variaveis por propriedade - analise RPD
-# Pietro Gragnolati Fernandes
+# Marluce Scarabello
 #########################################################
 
 # Variaveis dinamicas
@@ -19,7 +19,7 @@ pastagem_2003 <- raster("pa_br_qualpastagem_lapig_100m_2003_albers.tif"); pastag
 pastagem_2004 <- raster("pa_br_qualpastagem_lapig_100m_2004_albers.tif"); pastagem_2004;
 pastagem_2005 <- raster("pa_br_qualpastagem_lapig_100m_2005_albers.tif"); pastagem_2005;
 pastagem_2006 <- raster("pa_br_qualpastagem_lapig_100m_2006_albers.tif"); pastagem_2006;
-pastagem_2009 <- raster("pa_br_qualpastagem_lapig_100m_2009_albers.tif"); pastagem_2010;
+pastagem_2009 <- raster("pa_br_qualpastagem_lapig_100m_2009_albers.tif"); pastagem_2009;
 pastagem_2010 <- raster("pa_br_qualpastagem_lapig_100m_2010_albers.tif"); pastagem_2010;
 pastagem_2011 <- raster("pa_br_qualpastagem_lapig_100m_2011_albers.tif"); pastagem_2011;
 pastagem_2012 <- raster("pa_br_qualpastagem_lapig_100m_2012_albers.tif"); pastagem_2012;
