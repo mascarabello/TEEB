@@ -1,0 +1,218 @@
+
+-- Script para gerar os resultados do raio-x de RPD nos ultimos 10 anos
+-- 
+
+select * from public.teeb_raiox_rpd_2010_2020 where rpd1020 != 0
+
+select sum(rpd1020)/1000000 from public.teeb_raiox_rpd_2010_2020 where rpd1020 is not null
+
+select * from public.teeb_raiox_rpd_2010_2020 where idcar_imaflora = 4272469
+
+select * from public.teeb_raiox_rpd_2010_2020v2 where idcar_imaflora = 4272469
+
+
+
+select * FROM teeb.pa_br_landtenure_v202105_albers_imovel where gid = 4272469 -- area 3054.86
+
+select area/10000.0 FROM teeb.pa_br_landtenure_v202105_albers_imovel where gid = 4272469 -- area 3054.86
+
+
+
+--- Tabela auxiliar para Mapa
+-- Área de pastagem recuperada entre 2010 e 2020 por estado
+
+select 
+count(distinct idcar_imaflora) as num_imoveis
+from public.teeb_raiox_rpd_2010_2020
+where idcar_imaflora > 0 
+
+select 
+sum(rpd1020) as area_rpd_ha
+from public.teeb_raiox_rpd_2010_2020
+
+select 
+sum(area_ha) as area_rpd_ha
+from public.teeb_raiox_rpd_2010_2020
+
+
+
+select 
+sum(rpd1020)/1000000 as area_rpd1020_ha,
+sum(rpd1520)/1000000 as area_rpd1520_ha,
+sum(rpd1015)/1000000 as area_rpd1015_ha
+from public.teeb_raiox_rpd_2010_2020v3
+
+
+select 
+sum(rpd1020)/1000000 as area_rpd1020_ha,
+sum(rpd1520)/1000000 as area_rpd1520_ha,
+sum(rpd1015)/1000000 as area_rpd1015_ha
+from public.teeb_raiox_rpd_2010_2020v3
+where idcar_imaflora > 0 
+
+
+select 
+substring(municipios::text, 1, 2)::int as cd_uf,
+count(distinct idcar_imaflora) as num_imoveis,
+sum(rpd1020) as area_rpd_ha
+from public.teeb_raiox_rpd_2010_2020
+where idcar_imaflora > 0 and municipios IS NOT NULL
+GROUP BY cd_uf
+
+select * from public.teeb_raiox_rpd_2010_2020
+
+select 
+count(idcar_imaflora) as num_imoveis,
+sum(rpd1020) as area_rpd_ha
+from public.teeb_raiox_rpd_2010_2020
+where idcar_imaflora != 0 and municipios IS NOT NULL and rpd1020 > 0
+
+
+-- area recuperada por tamanho de imóvel
+WITH foo as (
+SELECT 
+idcar_imaflora,
+municipios,
+rpd1020,
+CASE
+    WHEN area_ha = 0.0 THEN 'ERRO' 
+    WHEN area_ha > 0.0 AND area_ha <= 50.0 THEN '0-50'
+	WHEN area_ha > 50.0 AND area_ha<= 100.0 THEN '50-100'
+	WHEN area_ha > 100.0 AND area_ha <= 500.0 THEN '100-500'
+	WHEN area_ha > 500.0 AND area_ha <= 1000.0 THEN '500-1000'	
+	WHEN area_ha > 1000.0 THEN '>1000 '	
+	else 'teste'
+END tamanho
+FROM public.teeb_raiox_rpd_2010_2020
+WHERE municipios IS NOT NULL and idcar_imaflora > 0 AND rpd1020 > 0
+GROUP BY idcar_imaflora, municipios, rpd1020, tamanho)
+select 
+tamanho,
+count(idcar_imaflora) as num_imoveis,
+sum(rpd1020) as area_rpd_ha
+FROM foo group by tamanho
+
+
+
+
+WITH foo as (
+SELECT 
+b.idcar_imaflora,
+b.municipios,
+b.rpd1020,
+CASE
+    WHEN a.area/10000.0 = 0.0 THEN 'ERRO' 
+    WHEN a.area/10000.0 > 0.0 AND a.area/10000.0 <= 50.0 THEN '0-50'
+	WHEN a.area/10000.0 > 50.0 AND a.area/10000.0 <= 100.0 THEN '50-100'
+	WHEN a.area/10000.0 > 100.0 AND a.area/10000.0 <= 500.0 THEN '100-500'
+	WHEN a.area/10000.0 > 500.0 AND a.area/10000.0 <= 1000.0 THEN '500-1000'	
+	WHEN a.area/10000.0 > 1000.0 THEN '>1000 '	
+END tamanho
+FROM public.teeb_raiox_rpd_2010_2020 as b,
+     teeb.pa_br_landtenure_v202105_albers_imovel as a	
+WHERE b.idcar_imaflora=a.gid AND b.municipios IS NOT NULL and b.idcar_imaflora > 0 
+GROUP BY b.idcar_imaflora, b.municipios, b.rpd1020, tamanho)
+select 
+tamanho,
+count(distinct idcar_imaflora) as num_imoveis,
+sum(rpd1020) as area_rpd_ha
+FROM foo group by tamanho
+
+
+
+--- area recuperada por estado e tamanho de imovel
+
+WITH foo as (
+SELECT 
+b.idcar_imaflora,
+b.municipios,
+b.rpd1020,
+CASE
+    WHEN a.area/10000.0 = 0.0 THEN 'ERRO' 
+    WHEN a.area/10000.0 > 0.0 AND a.area/10000.0 <= 50.0 THEN '0-50'
+	WHEN a.area/10000.0 > 50.0 AND a.area/10000.0 <= 100.0 THEN '50-100'
+	WHEN a.area/10000.0 > 100.0 AND a.area/10000.0 <= 500.0 THEN '100-500'
+	WHEN a.area/10000.0 > 500.0 AND a.area/10000.0 <= 1000.0 THEN '500-1000'	
+	WHEN a.area/10000.0 > 1000.0 THEN '>1000 '	
+END tamanho
+FROM public.teeb_raiox_rpd_2010_2020 as b,
+     teeb.pa_br_landtenure_v202105_albers_imovel as a	
+WHERE b.idcar_imaflora=a.gid AND b.municipios IS NOT NULL AND a.area != 0.0 and b.idcar_imaflora > 0 
+GROUP BY b.idcar_imaflora, b.municipios, b.rpd1020, tamanho)
+select 
+substring(municipios::text, 1, 2)::int as cd_uf,
+tamanho,
+count(distinct idcar_imaflora) as num_imoveis,
+sum(rpd1020) as area_rpd_ha
+FROM foo group by cd_uf, tamanho
+
+
+
+
+
+
+
+
+
+
+CASE 
+    WHEN cd_uf = 11  THEN 'RO'
+    WHEN cd_uf = 12  THEN 'AC'
+    WHEN cd_uf = 13  THEN 'AM'
+	WHEN cd_uf = 14  THEN 'RR'
+	WHEN cd_uf = 15  THEN 'PA'	
+	WHEN cd_uf = 16  THEN 'AP'	
+	WHEN cd_uf = 17  THEN 'TO'	
+	WHEN cd_uf = 21  THEN 'MA'	
+	WHEN cd_uf = 22  THEN 'PI'	
+	WHEN cd_uf = 23  THEN 'CE'
+	WHEN cd_uf = 24  THEN 'RN'	
+	WHEN cd_uf = 25  THEN 'PB'
+	WHEN cd_uf = 26  THEN 'PE'	
+	WHEN cd_uf = 27  THEN 'AL'
+	WHEN cd_uf = 28  THEN 'SE'	
+	WHEN cd_uf = 29  THEN 'BA'		
+	WHEN cd_uf = 31  THEN 'MG'			
+	WHEN cd_uf = 32  THEN 'ES'			
+	WHEN cd_uf = 33  THEN 'RJ'			
+	WHEN cd_uf = 35  THEN 'SP'				
+	WHEN cd_uf = 41  THEN 'PR'					
+	WHEN cd_uf = 42  THEN 'SC'					
+	WHEN cd_uf = 43  THEN 'RS'					
+	WHEN cd_uf = 50  THEN 'MS'
+	WHEN cd_uf = 51  THEN 'MT'	
+	WHEN cd_uf = 52  THEN 'GO'	
+	WHEN cd_uf = 53  THEN 'DF'	
+END sigla_uf,
+
+
+
+DROP TABLE IF EXISTS teeb.raiox_rpd;
+CREATE TABLE teeb.raiox_rpd AS
+WITH foo as (SELECT 
+a.gid,	 
+substring(a.cd_mun::text, 1, 2)::int as cd_uf,
+CASE 
+ WHEN b.cenario1 = 100 or b.cenario1 = 1000 THEN 'Pastagem degradada' 			 
+ WHEN b.cenario1 = 300 or b.cenario1 = 3000 THEN 'Pastagem recuperada' 
+ ELSE 'NON'
+end as classes_uso,
+sum(b.area_ha) as area_c1
+FROM teeb.teeb_cpixels_cenarios_rpdalocada_v13set23 as b,
+     teeb.landtenure_v202105_4674_imovel as a	
+WHERE b.idcar_imaflora=a.gid 
+	 GROUP BY a.gid, a.cd_mun, b.cenario1)
+select
+c.gid,
+c.cd_uf,
+d.regioes_term,
+d.tamanho,
+c.classes_uso,
+sum(c.area_c1) as area_ha
+FROM foo as c
+ left join teeb.imoveis_regioesterm as d on c.gid=d.gid
+GROUP BY c.gid,c.cd_uf, d.regioes_term, d.tamanho, c.classes_uso, c.area_c1
+
+
+
+
