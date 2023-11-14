@@ -103,10 +103,11 @@ system.time(for (i in 1:bss$n) {
                    uso2020 = getValues(uso2020, row = bss$row[i], nrows = bss$nrows[i])   
   )
   
-  #  dt <- subset(dt, idcar_imaflora > 0)
-  
-  dt$cpd1020 <- ifelse(dt$qualpastagem_2010 %in% c(1) & dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
-  dt$daa1020 <- ifelse(dt$uso2010 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$qualpastagem_2020 %in% c(1, 2), 1, 0)
+  # se pastagem no Mapbiomas (ajustado) E é pastagem degradada em 2010, e em 2020 é agricultura
+  dt$cpd1020 <- ifelse(dt$uso2010 %in% c(15) & dt$qualpastagem_2010 %in% c(1,2) & 
+                         dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
+  dt$daa1020 <- ifelse(dt$uso2010 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & 
+                         dt$qualpastagem_2020 %in% c(1, 2) & dt$uso2020 %in% c(15), 1, 0)
   
   
   
