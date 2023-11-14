@@ -82,24 +82,6 @@ createTableQuery <-
 id serial4 NOT NULL,
 idcar_imaflora integer NULL,
 municipios integer NULL,
-pcd1011 float8 null,
-pcd1112 float8 null,
-pcd1213 float8 null,
-pcd1314 float8 null,
-pcd1415 float8 null,
-pcd1516 float8 null,
-pcd1617 float8 null,
-pcd1718 float8 null,
-pcd1819 float8 null,
-pcc1011 float8 null,
-pcc1112 float8 null,
-pcc1213 float8 null,
-pcc1314 float8 null,
-pcc1415 float8 null,
-pcc1516 float8 null,
-pcc1617 float8 null,
-pcc1718 float8 null,
-pcc1819 float8 null,
 cpd0910 float8 null,
 cpd1011 float8 null,
 cpd1112 float8 null,
@@ -184,79 +166,40 @@ system.time(for (i in 1:bss$n) {
   
   #  dt <- subset(dt, idcar_imaflora > 0)
   
-  dt$cpd0910 <- ifelse(dt$pastagem_2009 %in% c(1, 2) & dt$uso2010 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
-  dt$cpd1011 <- ifelse(dt$pastagem_2010 %in% c(1, 2) & dt$uso2011 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
-  dt$cpd1112 <- ifelse(dt$pastagem_2011 %in% c(1, 2) & dt$uso2012 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
-  dt$cpd1213 <- ifelse(dt$pastagem_2012 %in% c(1, 2) & dt$uso2013 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
-  dt$cpd1314 <- ifelse(dt$pastagem_2013 %in% c(1, 2) & dt$uso2014 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
-  dt$cpd1415 <- ifelse(dt$pastagem_2014 %in% c(1, 2) & dt$uso2015 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)  
-  dt$cpd1516 <- ifelse(dt$pastagem_2015 %in% c(1, 2) & dt$uso2016 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
-  dt$cpd1617 <- ifelse(dt$pastagem_2016 %in% c(1, 2) & dt$uso2017 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)  
-  dt$cpd1718 <- ifelse(dt$pastagem_2017 %in% c(1, 2) & dt$uso2018 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
-  dt$cpd1819 <- ifelse(dt$pastagem_2018 %in% c(1, 2) & dt$uso2019 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)  
-  dt$cpd1920 <- ifelse(dt$pastagem_2019 %in% c(1, 2) & dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
-  dt$cpd1020 <- ifelse(dt$pastagem_2010 %in% c(1, 2) & dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
-  dt$cpd1015 <- ifelse(dt$pastagem_2010 %in% c(1, 2) & dt$uso2015 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
-  dt$cpd1520 <- ifelse(dt$pastagem_2015 %in% c(1, 2) & dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
-  dt$pd0910 <- ifelse(dt$uso2009 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2010 %in% c(1, 2), 1, 0)
-  dt$pd1011 <- ifelse(dt$uso2010 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2011 %in% c(1, 2), 1, 0)
-  dt$pd1112 <- ifelse(dt$uso2011 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2012 %in% c(1, 2), 1, 0)
-  dt$pd1213 <- ifelse(dt$uso2012 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2013 %in% c(1, 2), 1, 0)
-  dt$pd1314 <- ifelse(dt$uso2013 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2014 %in% c(1, 2), 1, 0)
-  dt$pd1415 <- ifelse(dt$uso2014 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2015 %in% c(1, 2), 1, 0)  
-  dt$pd1516 <- ifelse(dt$uso2015 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2016 %in% c(1, 2), 1, 0)
-  dt$pd1617 <- ifelse(dt$uso2016 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2017 %in% c(1, 2), 1, 0)  
-  dt$pd1718 <- ifelse(dt$uso2017 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2018 %in% c(1, 2), 1, 0)
-  dt$pd1819 <- ifelse(dt$uso2018 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2019 %in% c(1, 2), 1, 0)  
-  dt$pd1920 <- ifelse(dt$uso2019 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2020 %in% c(1, 2), 1, 0)
-  dt$pd1020 <- ifelse(dt$uso2010 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2020 %in% c(1, 2), 1, 0)
-  dt$pd1015 <- ifelse(dt$uso2010 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2015 %in% c(1, 2), 1, 0)
-  dt$pd1520 <- ifelse(dt$uso2015 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2020 %in% c(1, 2), 1, 0)
-
-  dt$pcd1011 <- ifelse(dt$pastagem_2010 %in% c(1, 2) & dt$uso2011 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$pastagem_2020 %in% c(1, 2),1,0)
-  dt$pcd1112 <- ifelse(dt$pastagem_2011 %in% c(1, 2) & dt$uso2012 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$pastagem_2020 %in% c(1, 2),1,0)
-  dt$pcd1213 <- ifelse(dt$pastagem_2012 %in% c(1, 2) & dt$uso2013 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$pastagem_2020 %in% c(1, 2),1,0)
-  dt$pcd1314 <- ifelse(dt$pastagem_2013 %in% c(1, 2) & dt$uso2014 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$pastagem_2020 %in% c(1, 2),1,0)
-  dt$pcd1415 <- ifelse(dt$pastagem_2014 %in% c(1, 2) & dt$uso2015 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$pastagem_2020 %in% c(1, 2),1,0)
-  dt$pcd1516 <- ifelse(dt$pastagem_2015 %in% c(1, 2) & dt$uso2016 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$pastagem_2020 %in% c(1, 2),1,0)
-  dt$pcd1617 <- ifelse(dt$pastagem_2016 %in% c(1, 2) & dt$uso2017 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$pastagem_2020 %in% c(1, 2),1,0)
-  dt$pcd1718 <- ifelse(dt$pastagem_2017 %in% c(1, 2) & dt$uso2018 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$pastagem_2020 %in% c(1, 2),1,0)
-  dt$pcd1819 <- ifelse(dt$pastagem_2018 %in% c(1, 2) & dt$uso2019 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$pastagem_2020 %in% c(1, 2),1,0)
-  
-  dt$pcc1011 <- ifelse(dt$pastagem_2010 %in% c(1, 2) & dt$uso2011 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) ,1,0)
-  dt$pcc1112 <- ifelse(dt$pastagem_2011 %in% c(1, 2) & dt$uso2012 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) ,1,0)
-  dt$pcc1213 <- ifelse(dt$pastagem_2012 %in% c(1, 2) & dt$uso2013 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) ,1,0)
-  dt$pcc1314 <- ifelse(dt$pastagem_2013 %in% c(1, 2) & dt$uso2014 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) ,1,0)
-  dt$pcc1415 <- ifelse(dt$pastagem_2014 %in% c(1, 2) & dt$uso2015 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) ,1,0)
-  dt$pcc1516 <- ifelse(dt$pastagem_2015 %in% c(1, 2) & dt$uso2016 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) ,1,0)
-  dt$pcc1617 <- ifelse(dt$pastagem_2016 %in% c(1, 2) & dt$uso2017 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) ,1,0)
-  dt$pcc1718 <- ifelse(dt$pastagem_2017 %in% c(1, 2) & dt$uso2018 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) ,1,0)
-  dt$pcc1819 <- ifelse(dt$pastagem_2018 %in% c(1, 2) & dt$uso2019 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62)  & dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) ,1,0)
-  
+  dt$cpd0910 <- ifelse(dt$pastagem_2009 %in% c(1, 2) & dt$uso2010 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62), 1, 0)
+  dt$cpd1011 <- ifelse(dt$pastagem_2010 %in% c(1, 2) & dt$uso2011 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62), 1, 0)
+  dt$cpd1112 <- ifelse(dt$pastagem_2011 %in% c(1, 2) & dt$uso2012 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62), 1, 0)
+  dt$cpd1213 <- ifelse(dt$pastagem_2012 %in% c(1, 2) & dt$uso2013 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62), 1, 0)
+  dt$cpd1314 <- ifelse(dt$pastagem_2013 %in% c(1, 2) & dt$uso2014 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62), 1, 0)
+  dt$cpd1415 <- ifelse(dt$pastagem_2014 %in% c(1, 2) & dt$uso2015 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62), 1, 0)  
+  dt$cpd1516 <- ifelse(dt$pastagem_2015 %in% c(1, 2) & dt$uso2016 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62), 1, 0)
+  dt$cpd1617 <- ifelse(dt$pastagem_2016 %in% c(1, 2) & dt$uso2017 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62), 1, 0)  
+  dt$cpd1718 <- ifelse(dt$pastagem_2017 %in% c(1, 2) & dt$uso2018 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62), 1, 0)
+  dt$cpd1819 <- ifelse(dt$pastagem_2018 %in% c(1, 2) & dt$uso2019 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62), 1, 0)  
+  dt$cpd1920 <- ifelse(dt$pastagem_2019 %in% c(1, 2) & dt$uso2020 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62), 1, 0)
+  dt$cpd1020 <- ifelse(dt$pastagem_2010 %in% c(1, 2) & dt$uso2020 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62), 1, 0)
+  dt$cpd1015 <- ifelse(dt$pastagem_2010 %in% c(1, 2) & dt$uso2015 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62), 1, 0)
+  dt$cpd1520 <- ifelse(dt$pastagem_2015 %in% c(1, 2) & dt$uso2020 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62), 1, 0)
+  dt$pd0910 <- ifelse(dt$uso2009 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2010 %in% c(1, 2), 1, 0)
+  dt$pd1011 <- ifelse(dt$uso2010 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2011 %in% c(1, 2), 1, 0)
+  dt$pd1112 <- ifelse(dt$uso2011 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2012 %in% c(1, 2), 1, 0)
+  dt$pd1213 <- ifelse(dt$uso2012 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2013 %in% c(1, 2), 1, 0)
+  dt$pd1314 <- ifelse(dt$uso2013 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2014 %in% c(1, 2), 1, 0)
+  dt$pd1415 <- ifelse(dt$uso2014 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2015 %in% c(1, 2), 1, 0)  
+  dt$pd1516 <- ifelse(dt$uso2015 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2016 %in% c(1, 2), 1, 0)
+  dt$pd1617 <- ifelse(dt$uso2016 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2017 %in% c(1, 2), 1, 0)  
+  dt$pd1718 <- ifelse(dt$uso2017 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2018 %in% c(1, 2), 1, 0)
+  dt$pd1819 <- ifelse(dt$uso2018 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2019 %in% c(1, 2), 1, 0)  
+  dt$pd1920 <- ifelse(dt$uso2019 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2020 %in% c(1, 2), 1, 0)
+  dt$pd1020 <- ifelse(dt$uso2010 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2020 %in% c(1, 2), 1, 0)
+  dt$pd1015 <- ifelse(dt$uso2010 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2015 %in% c(1, 2), 1, 0)
+  dt$pd1520 <- ifelse(dt$uso2015 %in% c(9, 20, 39, 40, 41, 46, 47, 48, 62) & dt$pastagem_2020 %in% c(1, 2), 1, 0)
   
   
   
   x <- dt %>%
     group_by(idcar_imaflora,municipios) %>%
-    summarise(pcd1011 = sum(pcd1011, na.rm = T),
-              pcd1112 = sum(pcd1112, na.rm = T),
-              pcd1213 = sum(pcd1213, na.rm = T),
-              pcd1314 = sum(pcd1314, na.rm = T),
-              pcd1415 = sum(pcd1415, na.rm = T),
-              pcd1516 = sum(pcd1516, na.rm = T),
-              pcd1617 = sum(pcd1617, na.rm = T),
-              pcd1718 = sum(pcd1718, na.rm = T),
-              pcd1819 = sum(pcd1819, na.rm = T),
-              pcc1011 = sum(pcc1011, na.rm = T),
-              pcc1112 = sum(pcc1112, na.rm = T),
-              pcc1213 = sum(pcc1213, na.rm = T),
-              pcc1314 = sum(pcc1314, na.rm = T),
-              pcc1415 = sum(pcc1415, na.rm = T),
-              pcc1516 = sum(pcc1516, na.rm = T),
-              pcc1617 = sum(pcc1617, na.rm = T),
-              pcc1718 = sum(pcc1718, na.rm = T),
-              pcc1819 = sum(pcc1819, na.rm = T),
-              cpd0910 = sum(cpd0910, na.rm = T),
+    summarise(cpd0910 = sum(cpd0910, na.rm = T),
               cpd1011 = sum(cpd1011, na.rm = T),
               cpd1112 = sum(cpd1112, na.rm = T),
               cpd1213 = sum(cpd1213, na.rm = T),
