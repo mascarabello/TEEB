@@ -25,7 +25,7 @@ error=function(cond) {
 
 start <- Sys.time()
 
-dt1 <- dbGetQuery(connec_local , "WITH foo as (
+dt <- dbGetQuery(connec_local , "WITH foo as (
 SELECT 
 a.idcar_imaflora,
 b.cd_uf,	
@@ -79,8 +79,8 @@ dt1_label <-
 options(OutDec=",")
 p1 <- dt1_label %>%
   ggplot(aes(x = "", y = num_imoveis, fill = tamanho)) +
-  geom_bar(stat = "identity",width=1, color="white") +
-  ggtitle("Número de imóveis (mil) - DAA") +
+  geom_bar(stat = "identity",width=1, color="white",show.legend = FALSE) +
+  #ggtitle("") +
   coord_polar("y", start = 0) +
   theme_void() +
   theme(plot.title = element_text(hjust = 0.5, size = 20),
@@ -88,12 +88,15 @@ p1 <- dt1_label %>%
         legend.title = element_text(size = 20))+
   #geom_text(aes(y= text_y, label = paste0(round(Area, 1),' (', round(Perc1,1), '%)')), color = "white", size=6) +
   #geom_text(aes(label = paste0(round(Area, 1),' (', round(Perc1,1), '%)')),size = 12,position = position_fill(vjust = 0.5), show.legend = F) +
-  geom_label_repel(aes(label = paste0(round(num_imoveis, 1),' (', round(perc*100,1), '%)'),y = text_y), 
+  geom_label_repel(aes(label = paste0(round(perc*100), '%'),y = text_y), 
                    #nudge_x = 0.6, nudge_y = 0.6,
                    #position = position_fill(vjust = 0.5), 
                    size = 6, show.legend = F) +
   scale_fill_manual('Tamanho do imóvel', values = categorias_pallete); p1
 
+
+ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/slide8_numero.pdf', plot = p1, units = 'in', dpi = 300, scale = 0.6)
+#ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/slide8_numero_sn.pdf', plot = p1, units = 'in', dpi = 300, scale = 0.6)
 
 ## ÁREA
 dt2 <- dt[c(1,3)]
@@ -111,7 +114,7 @@ options(OutDec=",")
 p2 <- dt2_label %>%
   ggplot(aes(x = "", y = area_daa_ha, fill = tamanho)) +
   geom_bar(stat = "identity",width=1, color="white",show.legend = FALSE) +
-  ggtitle("Área de DAA (Mha)") +
+  #ggtitle("") +
   coord_polar("y", start = 0) +
   theme_void() +
   theme(plot.title = element_text(hjust = 0.5, size = 20),
@@ -119,11 +122,14 @@ p2 <- dt2_label %>%
         legend.title = element_text(size = 20))+
   #geom_text(aes(y= text_y, label = paste0(round(Area, 1),' (', round(Perc1,1), '%)')), color = "white", size=6) +
   #geom_text(aes(label = paste0(round(Area, 1),' (', round(Perc1,1), '%)')),size = 12,position = position_fill(vjust = 0.5), show.legend = F) +
-  geom_label_repel(aes(label = paste0(round(area_daa_ha, 1),' Mha (', round(perc*100,1), '%)'),y = text_y), 
+  #geom_label_repel(aes(label = paste0(round(perc*100), '%'),y = text_y), 
                    #nudge_x = 0.6, nudge_y = 0.6,
                    #position = position_fill(vjust = 0.5), 
-                   size = 5, show.legend = F) +
+   #                size = 5, show.legend = F) +
   scale_fill_manual('Tamanho do imóvel', values = categorias_pallete); p2
+
+#ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/slide8_area.pdf', plot = p2, units = 'in', dpi = 300, scale = 0.6)
+ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/slide8_area_sn.pdf', plot = p2, units = 'in', dpi = 300, scale = 0.6)
 
 
 library(cowplot)
