@@ -114,7 +114,7 @@ options(OutDec=",")
 p2 <- dt2_label %>%
   ggplot(aes(x = "", y = area_cpd_ha, fill = tamanho)) +
   geom_bar(stat = "identity",width=1, color="white",show.legend = FALSE) +
-  ggtitle("") +
+  #ggtitle("") +
   coord_polar("y", start = 0) +
   theme_void() +
   theme(plot.title = element_text(hjust = 0.5, size = 20),
@@ -125,7 +125,7 @@ p2 <- dt2_label %>%
   #geom_label_repel(aes(label = paste0(round(perc*100), '%'),y = text_y), 
                    #nudge_x = 0.6, nudge_y = 0.6,
                    #position = position_fill(vjust = 0.5), 
-   #                size = 5, show.legend = F) +
+  #                size = 5, show.legend = F) +
   scale_fill_manual('Tamanho do imóvel', values = categorias_pallete); p2
 
 #ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/slide7_area.pdf', plot = p2, units = 'in', dpi = 300, scale = 0.6)
