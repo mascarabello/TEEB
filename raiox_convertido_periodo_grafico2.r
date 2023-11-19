@@ -31,7 +31,7 @@ a.idcar_imaflora,
 b.cd_uf,	
 b.tamanho,
 sum(a.daa1020) as acum_daa
-FROM public.teeb_raiox_conversao_final_2010_2020 as a
+FROM teeb_raiox_conversao_corr_newagri as a
 	left join teeb.imoveis_regioesterm as b 
 	on a.municipios IS NOT NULL and a.idcar_imaflora != 0 AND b.gid != 0  AND a.idcar_imaflora = b.gid and b.cd_uf is not null 
 GROUP BY a.idcar_imaflora, b.cd_uf, b.tamanho)
@@ -88,15 +88,15 @@ p1 <- dt1_label %>%
         legend.title = element_text(size = 20))+
   #geom_text(aes(y= text_y, label = paste0(round(Area, 1),' (', round(Perc1,1), '%)')), color = "white", size=6) +
   #geom_text(aes(label = paste0(round(Area, 1),' (', round(Perc1,1), '%)')),size = 12,position = position_fill(vjust = 0.5), show.legend = F) +
-  geom_label_repel(aes(label = paste0(round(perc*100), '%'),y = text_y), 
+  #geom_label_repel(aes(label = paste0(round(perc*100), '%'),y = text_y), 
                    #nudge_x = 0.6, nudge_y = 0.6,
                    #position = position_fill(vjust = 0.5), 
-                   size = 6, show.legend = F) +
+  #                 size = 6, show.legend = F) +
   scale_fill_manual('Tamanho do imóvel', values = categorias_pallete); p1
 
 
-ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/slide8_numero.pdf', plot = p1, units = 'in', dpi = 300, scale = 0.6)
-#ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/slide8_numero_sn.pdf', plot = p1, units = 'in', dpi = 300, scale = 0.6)
+##ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/daa_novaagri_numero.pdf', plot = p1, units = 'in', dpi = 300, scale = 0.6)
+ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/daa_novaagri_numero_sn.pdf', plot = p1, units = 'in', dpi = 300, scale = 0.6)
 
 ## ÁREA
 dt2 <- dt[c(1,3)]
@@ -122,14 +122,14 @@ p2 <- dt2_label %>%
         legend.title = element_text(size = 20))+
   #geom_text(aes(y= text_y, label = paste0(round(Area, 1),' (', round(Perc1,1), '%)')), color = "white", size=6) +
   #geom_text(aes(label = paste0(round(Area, 1),' (', round(Perc1,1), '%)')),size = 12,position = position_fill(vjust = 0.5), show.legend = F) +
-  #geom_label_repel(aes(label = paste0(round(perc*100), '%'),y = text_y), 
+  geom_label_repel(aes(label = paste0(round(perc*100), '%'),y = text_y), 
                    #nudge_x = 0.6, nudge_y = 0.6,
                    #position = position_fill(vjust = 0.5), 
-   #                size = 5, show.legend = F) +
+                   size = 5, show.legend = F) +
   scale_fill_manual('Tamanho do imóvel', values = categorias_pallete); p2
 
-#ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/slide8_area.pdf', plot = p2, units = 'in', dpi = 300, scale = 0.6)
-ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/slide8_area_sn.pdf', plot = p2, units = 'in', dpi = 300, scale = 0.6)
+ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/daa_novaagri_area.pdf', plot = p2, units = 'in', dpi = 300, scale = 0.6)
+#ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/daa_novaagri_area_sn.pdf', plot = p2, units = 'in', dpi = 300, scale = 0.6)
 
 
 library(cowplot)
