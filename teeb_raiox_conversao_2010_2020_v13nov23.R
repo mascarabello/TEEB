@@ -54,11 +54,11 @@ executeQuery <- function(connec_local, query) {
 dbBegin(connec_local)
 
 
-drop_table <- "DROP TABLE IF EXISTS public.teeb_raiox_conversao_cor_newagro"
+drop_table <- "DROP TABLE IF EXISTS public.teeb_raiox_conversao_corr_newagri"
 executeQuery(connec_local, drop_table)
 
 createTableQuery <-  
-  "CREATE TABLE public.teeb_raiox_conversao_cor_newagro (
+  "CREATE TABLE public.teeb_raiox_conversao_corr_newagri (
 
 id serial4 NOT NULL,
 idcar_imaflora integer NULL,
@@ -74,9 +74,9 @@ executeQuery(connec_local, createTableQuery)
 
 # Criando índices
 indexQueries <- c(
-  "CREATE INDEX teeb_raiox_conversao_cor_newagro_id_idx ON public.teeb_raiox_conversao_cor_newagro USING btree (id)",
-  "CREATE INDEX teeb_raiox_conversao_cor_newagro_idcar_imaflora_idx ON public.teeb_raiox_conversao_cor_newagro USING btree (idcar_imaflora)",
-  "CREATE INDEX teeb_raiox_conversao_cor_newagro_municipios_idx ON public.teeb_raiox_conversao_cor_newagro USING btree (municipios)")
+  "CREATE INDEX teeb_raiox_conversao_corr_newagri_id_idx ON public.teeb_raiox_conversao_corr_newagri USING btree (id)",
+  "CREATE INDEX teeb_raiox_conversao_corr_newagri_idcar_imaflora_idx ON public.teeb_raiox_conversao_corr_newagri USING btree (idcar_imaflora)",
+  "CREATE INDEX teeb_raiox_conversao_corr_newagri_municipios_idx ON public.teeb_raiox_conversao_corr_newagri USING btree (municipios)")
 
 
 for (indexQuery in indexQueries) {
@@ -118,7 +118,7 @@ system.time(for (i in 1:bss$n) {
               area_ha = n()*1.0) %>% as_tibble()
   rm(dt)
   
-  dbWriteTable(connec_local, 'teeb_raiox_conversao_cor_newagro', x, row.names = F, append = T)
+  dbWriteTable(connec_local, 'teeb_raiox_conversao_corr_newagri', x, row.names = F, append = T)
   
   cat('Escrito i = ', i)})
 
