@@ -15,14 +15,10 @@ setwd("/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/rasters")
 
 idcar_imaflora <- raster("pa_br_malhafundiaria_imaflora_imovel_100m.tif"); idcar_imaflora;
 municipios <- raster("municipios_albers.tif"); municipios; 
-#pastagem_2010 <- raster("pa_br_pastagem_lapig_100m_2010_albers.tif"); pastagem_2010;
-#pastagem_2020 <- raster("pa_br_pastagem_lapig_100m_2020_albers.tif"); pastagem_2020;
 qualpastagem_2010 <- raster("pa_br_qualpastagem_lapig_100m_2010_albers.tif"); qualpastagem_2010;
 qualpastagem_2020 <- raster("pa_br_qualpastagem_lapig_100m_2020_albers.tif"); qualpastagem_2020;
-#uso2010 <- raster("pa_br_usoterra_mapbiomas7_100m_2010_albers.tif"); uso2010;
-#uso2020 <- raster("pa_br_usoterra_mapbiomas7_100m_2020_albers.tif"); uso2020;
-uso2010 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2010_albersv2.tif"); uso2010;
-uso2020 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2020_albersv2.tif"); uso2020;
+uso2010 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2010_albers_corrigido.tif"); uso2010;
+uso2020 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2020_albers_corrigido.tif"); uso2020;
 
 
 
@@ -58,11 +54,11 @@ executeQuery <- function(connec_local, query) {
 dbBegin(connec_local)
 
 
-drop_table <- "DROP TABLE IF EXISTS public.teeb_raiox_conversao_final_2010_2020"
+drop_table <- "DROP TABLE IF EXISTS public.teeb_raiox_conversao_cor_newagro"
 executeQuery(connec_local, drop_table)
 
 createTableQuery <-  
-  "CREATE TABLE public.teeb_raiox_conversao_final_2010_2020 (
+  "CREATE TABLE public.teeb_raiox_conversao_cor_newagro (
 
 id serial4 NOT NULL,
 idcar_imaflora integer NULL,
@@ -78,9 +74,9 @@ executeQuery(connec_local, createTableQuery)
 
 # Criando índices
 indexQueries <- c(
-  "CREATE INDEX teeb_raiox_conversao_final_2010_2020_id_idx ON public.teeb_raiox_conversao_final_2010_2020 USING btree (id)",
-  "CREATE INDEX teeb_raiox_conversao_final_2010_2020_idcar_imaflora_idx ON public.teeb_raiox_conversao_final_2010_2020 USING btree (idcar_imaflora)",
-  "CREATE INDEX teeb_raiox_conversao_final_2010_2020_municipios_idx ON public.teeb_raiox_conversao_final_2010_2020 USING btree (municipios)")
+  "CREATE INDEX teeb_raiox_conversao_cor_newagro_id_idx ON public.teeb_raiox_conversao_cor_newagro USING btree (id)",
+  "CREATE INDEX teeb_raiox_conversao_cor_newagro_idcar_imaflora_idx ON public.teeb_raiox_conversao_cor_newagro USING btree (idcar_imaflora)",
+  "CREATE INDEX teeb_raiox_conversao_cor_newagro_municipios_idx ON public.teeb_raiox_conversao_cor_newagro USING btree (municipios)")
 
 
 for (indexQuery in indexQueries) {
@@ -104,10 +100,14 @@ system.time(for (i in 1:bss$n) {
   )
   
   # se pastagem no Mapbiomas (ajustado) E é pastagem degradada em 2010, e em 2020 é agricultura
-  dt$cpd1020 <- ifelse(dt$uso2010 %in% c(15) & dt$qualpastagem_2010 %in% c(1,2) & 
-                         dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
-  dt$daa1020 <- ifelse(dt$uso2010 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & 
-                         dt$qualpastagem_2020 %in% c(1, 2) & dt$uso2020 %in% c(15), 1, 0)
+#  dt$cpd1020 <- ifelse(dt$uso2010 %in% c(15) & dt$qualpastagem_2010 %in% c(1,2) & 
+#                         dt$uso2020 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 1, 0)
+#  dt$daa1020 <- ifelse(dt$uso2010 %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62) & 
+#                         dt$qualpastagem_2020 %in% c(1, 2) & dt$uso2020 %in% c(15), 1, 0)
+    dt$cpd1020 <- ifelse(dt$uso2010 %in% c(15) & dt$qualpastagem_2010 %in% c(1,2) & 
+                           dt$uso2020 %in% c(20, 39, 40, 41, 46, 47, 48, 62), 1, 0)
+    dt$daa1020 <- ifelse(dt$uso2010 %in% c(20, 39, 40, 41, 46, 47, 48, 62) & 
+                           dt$qualpastagem_2020 %in% c(1, 2) & dt$uso2020 %in% c(15), 1, 0)
   
   
   
@@ -118,7 +118,7 @@ system.time(for (i in 1:bss$n) {
               area_ha = n()*1.0) %>% as_tibble()
   rm(dt)
   
-  dbWriteTable(connec_local, 'teeb_raiox_conversao_final_2010_2020', x, row.names = F, append = T)
+  dbWriteTable(connec_local, 'teeb_raiox_conversao_cor_newagro', x, row.names = F, append = T)
   
   cat('Escrito i = ', i)})
 
