@@ -14,8 +14,8 @@ p_load(raster, data.table, dplyr, tidyr,RPostgreSQL)
 setwd("/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/rasters")
 
 municipios <- raster("municipios_albers.tif"); municipios; 
-uso1985 <- raster("pa_br_usoterra_mapbiomas7_lapig__100m_1985_albers_comp.tif"); uso1985;
-uso2021 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2021_albers_comp.tif"); uso2021;
+uso1985 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_1985_albers_corrigido.tif"); uso1985;
+uso2021 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2021_albers_corrigido.tif"); uso2021;
 
 
 
@@ -100,100 +100,6 @@ y_final_agricultura1 <- y_final_agricultura %>%  filter(classe != 'NAO')
 write.table(y_final_agricultura1, "/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/tabelas/output/uso_hist_1985_2021_agricultura_clean.csv",row.names = F, sep = ";")
 
 
-# Contar o uso em cada um dos anos ----------------------------------------
-rm(list = ls())
-
-# Instalando pacotes e lendo os dados
-library(pacman)
-p_load(raster, data.table, dplyr, tidyr,RPostgreSQL)
-
-setwd("/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/rasters")
-
-municipios <- raster("municipios_albers.tif"); municipios; 
-uso1985 <- raster("pa_br_usoterra_mapbiomas7_lapig__100m_1985_albers_comp.tif"); uso1985;
-uso2021 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2021_albers_comp.tif"); uso2021;
-uso1985ori <- raster("pa_br_usoterra_mapbiomas7_100m_1985_albers.tif"); uso1985ori;
-uso2021ori <- raster("pa_br_usoterra_mapbiomas7_100m_2021_albers.tif"); uso2021ori;
-
-
-# Preparando loop das variaveis
-bss <- blockSize(municipios); bss$n
-
-y <- data.frame(municipios = NA, uso1985 = NA, uso2021 = NA, uso1985ori = NA,uso2021ori = NA, area_ha = NA)
-
-system.time(for (i in 1:bss$n) {
-  dt <- data.table(municipios = getValues(municipios, row = bss$row[i], nrows = bss$nrows[i]),
-                   uso1985 = getValues(uso1985, row = bss$row[i], nrows = bss$nrows[i]),
-                   uso2021 = getValues(uso2021, row = bss$row[i], nrows = bss$nrows[i]),
-                   uso1985ori = getValues(uso1985ori, row = bss$row[i], nrows = bss$nrows[i]),
-                   uso2021ori = getValues(uso2021ori, row = bss$row[i], nrows = bss$nrows[i])   
-                   
-  )
-  
-  x <- dt %>%
-    group_by(municipios,uso1985,uso2021,uso1985ori,uso2021ori) %>%
-    summarise(area_ha = n()*1.0) %>% as_tibble()
-  
-  rm(dt)
-  
-  y <- rbind(y,x)
-  
-  rm(x)
-  print(i)
-})
-
-y_1985 <- y %>% 
-  filter(!is.na(municipios))%>% 
-  mutate(classe = ifelse(uso1985 %in% c(15), 'Pastagem',
-                         ifelse(uso1985 %in% c(20, 39, 40, 41, 46, 47, 48, 62), 'Agricultura',
-                                ifelse(uso1985 %in% c(9), 'Silvicultura',
-                                       ifelse(uso1985 %in% c(21), 'Mosaico',
-                                              ifelse(uso1985  %in% c(3, 4, 5, 11, 13, 49, 50), 'Vegetacao Nativa',
-                                       ifelse(uso1985  %in% c(0, 12, 23, 24, 25, 29, 30, 31, 32, 33), 'Outros','ERRO'))))))) %>%
-  
-  group_by(classe) %>% 
-  summarise(area_final = sum(area_ha/1000,na.rm = TRUE))
-
-y_1985
-
-y_1985ori <- y %>% 
-  filter(!is.na(municipios))%>% 
-  mutate(classe = ifelse(uso1985ori %in% c(15), 'Pastagem',
-                         ifelse(uso1985ori %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 'Agricultura',
-                                ifelse(uso1985ori  %in% c(3, 4, 5, 11, 13, 49, 50), 'Vegetacao Nativa',
-                                       ifelse(uso1985ori  %in% c(0, 12, 23, 24, 25, 29, 30, 31, 32, 33), 'Outros','ERRO'))))) %>%
-  
-  group_by(classe) %>% 
-  summarise(area_final = sum(area_ha/1000,na.rm = TRUE))
-
-y_1985ori
-
-y_2021 <- y %>% 
-  filter(!is.na(municipios))%>% 
-  mutate(classe = ifelse(uso2021 %in% c(15), 'Pastagem',
-                         ifelse(uso2021 %in% c(20, 39, 40, 41, 46, 47, 48, 62), 'Agricultura',
-                                ifelse(uso2021 %in% c(9), 'Silvicultura',
-                                       ifelse(uso2021 %in% c(21), 'Mosaico',
-                                              ifelse(uso2021  %in% c(3, 4, 5, 11, 13, 49, 50), 'Vegetacao Nativa',
-                                       ifelse(uso2021  %in% c(0, 12, 23, 24, 25, 29, 30, 31, 32, 33), 'Outros','ERRO'))))))) %>%
-  
-  group_by(classe) %>% 
-  summarise(area_final = sum(area_ha,na.rm = TRUE))
-
-y_2021
-
-y_2021ori <- y %>% 
-  filter(!is.na(municipios))%>% 
-  mutate(classe = ifelse(uso2021ori %in% c(15), 'Pastagem',
-                         ifelse(uso2021ori %in% c(9, 20, 21, 39, 40, 41, 46, 47, 48, 62), 'Agricultura',
-                                ifelse(uso2021ori  %in% c(3, 4, 5, 11, 13, 49, 50), 'Vegetacao Nativa',
-                                       ifelse(uso2021ori  %in% c(0, 12, 23, 24, 25, 29, 30, 31, 32, 33), 'Outros','ERRO'))))) %>%
-  
-  group_by(classe) %>% 
-  summarise(area_final = sum(area_ha,na.rm = TRUE))
-
-y_2021
-
 # Gerar mapa pixel para avaliar -------------------------------------------
 
 #Que era pastagem
@@ -206,9 +112,9 @@ p_load(raster, data.table, rgdal, sf, terra)
 setwd("/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/rasters")
 
 ## 1985
-uso1985 <- raster("pa_br_usoterra_mapbiomas7_lapig__100m_1985_albers_comp.tif"); uso1985;
-uso2021 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2021_albers_comp.tif"); uso2021;
-out <- raster("pa_br_usoterra_mapbiomas7_lapig__100m_1985_albers_comp.tif")
+uso1985 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_1985_albers_corrigido.tif"); uso1985;
+uso2021 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2021_albers_corrigido.tif"); uso2021;
+out <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_1985_albers_corrigido.tif")
 
 # Marking pasture pixels in LAPIG as pasture in MAPBIOMAS
 bss <- blockSize(uso1985)
@@ -217,7 +123,7 @@ lap <- readStart(uso2021)
 uso1985 <- readStart(uso1985)
 out <- readStart(out)
 #out <- writeStart(out, filename = "pa_br_usoterra_mapbiomas7_lapig_100m_2010_albers.tif",format = 'Gtiff',overwrite=TRUE)
-out <- writeStart(out, filename = "reclassificacao_agri/pa_br_usoterra_mapbiomas7_lapig_100m_1985_albers_comp_pastatual.tif",format = 'Gtiff',overwrite=TRUE,options=c("COMPRESS=DEFLATE","ZLEVEL=9","PREDICTOR=2","TFW=YES"))
+out <- writeStart(out, filename = "reclassificacao_agri/pa_br_usoterra_mapbiomas7_lapig_100m_1985_albers_corrigido_pastatual.tif",format = 'Gtiff',overwrite=TRUE,options=c("COMPRESS=DEFLATE","ZLEVEL=9","PREDICTOR=2","TFW=YES"))
 
 
 for(i in 1:bss$n) {
@@ -243,9 +149,9 @@ p_load(raster, data.table, rgdal, sf, terra)
 setwd("/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/rasters")
 
 ## 1985
-uso1985 <- raster("pa_br_usoterra_mapbiomas7_lapig__100m_1985_albers_comp.tif"); uso1985;
-uso2021 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2021_albers_comp.tif"); uso2021;
-out <- raster("pa_br_usoterra_mapbiomas7_lapig__100m_1985_albers_comp.tif")
+uso1985 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_1985_albers_corrigido.tif"); uso1985;
+uso2021 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2021_albers_corrigido.tif"); uso2021;
+out <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_1985_albers_corrigido.tif")
 
 # Marking pasture pixels in LAPIG as pasture in MAPBIOMAS
 bss <- blockSize(uso1985)
@@ -254,7 +160,7 @@ lap <- readStart(uso2021)
 uso1985 <- readStart(uso1985)
 out <- readStart(out)
 #out <- writeStart(out, filename = "pa_br_usoterra_mapbiomas7_lapig_100m_2010_albers.tif",format = 'Gtiff',overwrite=TRUE)
-out <- writeStart(out, filename = "reclassificacao_agri/pa_br_usoterra_mapbiomas7_lapig_100m_1985_albers_comp_agriatual.tif",format = 'Gtiff',overwrite=TRUE,options=c("COMPRESS=DEFLATE","ZLEVEL=9","PREDICTOR=2","TFW=YES"))
+out <- writeStart(out, filename = "reclassificacao_agri/pa_br_usoterra_mapbiomas7_lapig_100m_1985_albers_corrigido_agriatual.tif",format = 'Gtiff',overwrite=TRUE,options=c("COMPRESS=DEFLATE","ZLEVEL=9","PREDICTOR=2","TFW=YES"))
 
 
 for(i in 1:bss$n) {
