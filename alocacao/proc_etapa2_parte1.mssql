@@ -1,0 +1,200 @@
+
+-- ETAPA 2: OBJETIVO: Gerar um ranking de imoveis para alocacao espacial de RDP e ILP 
+-- Para atingir este objetivo, primeiramente vamos calcular a aptidao media e a infraestrutura media para cada imovel, 
+-- posteriormente calcularemos o indicador de credito rural. Por fim, teremos um indicador medio por tamanho de imovel 
+-- e regiao.
+
+
+-- Este script calcula a aptidao media e a infraestrutura media para cada imovel
+-- TABELA FINAL DESTE SCRIPT :  teeb.teeb_indice_aptidao_infra
+
+-- Os dados de aptidao e infraestrutura foram adicionados no BD a partir do scrip 2_countpixel_aptidaoinfra.R
+SELECT * FROM public.teeb_aptinfra_imovel_100m_final limit 100
+
+-- Copiando a tabela para o schema teeb - 10 min 43 sec
+DROP TABLE IF EXISTS teeb.teeb_countpixel_aptinfra_imovel_100m;
+CREATE TABLE teeb.teeb_countpixel_aptinfra_imovel_100m AS 
+SELECT *
+FROM public.teeb_aptinfra_imovel_100m_final
+
+SELECT * FROM teeb.teeb_countpixel_aptinfra_imovel_100m limit 10
+
+-- Apagando do schema public
+DROP TABLE IF EXISTS public.teeb_aptinfra_imovel_100m_final
+
+
+/* PRIMEIRA PARTE: APTIDAO */
+-- 3 min 56 secs
+drop table if exists teeb.teeb_aptidao_imovel;
+CREATE TABLE teeb.teeb_aptidao_imovel AS
+SELECT 
+idcar_imaflora,
+aptidao,
+sum(area_ha) as area_aptidao
+FROM teeb.teeb_countpixel_aptinfra_imovel_100m 
+GROUP BY idcar_imaflora, aptidao 
+
+select * FROM teeb.teeb_aptidao_imovel;
+
+--select * FROM teeb.teeb_aptidao_imovel WHERE idcar_imaflora = 5670238
+-- 29 secs 511 msec.
+drop table if exists teeb.teeb_aptidao_imovel_media;
+CREATE TABLE teeb.teeb_aptidao_imovel_media AS
+       SELECT a.gid as gid, a.cd_mun as cd_mun, a.area as area_imovel, a.sub_class as sub_class, 
+sum(b.area_aptidao*b.aptidao)/sum(b.area_aptidao) as media_aptidao
+FROM teeb.pa_br_landtenure_v202105_albers_imovel as a,
+     teeb.teeb_aptidao_imovel as b
+WHERE a.gid = b.idcar_imaflora
+GROUP BY a.gid, a.cd_mun, a.area, a.sub_class
+
+
+select * FROM teeb.pa_br_landtenure_v202105_albers_imovel
+select * FROM teeb.teeb_aptidao_imovel_media;
+SELECT * FROM teeb.imoveis_regioesterm limit 10;
+
+select tamanho, sum(area) as areafinal
+FROM teeb.imoveis_regioesterm
+GROUP BY tamanho
+
+/* Juntar dados de aptidao com região do TERM-BR */
+--9 secs 412 msec
+drop table if exists teeb.teeb_aptidao_imovel_media_regiao;
+CREATE TABLE teeb.teeb_aptidao_imovel_media_regiao AS
+select
+a.gid,
+a.cd_mun,
+substring(a.cd_mun::text, 1, 2)::int as cd_uf,
+a.sub_class,
+b.regioes_term,
+b.tamanho,
+a.media_aptidao
+FROM teeb.teeb_aptidao_imovel_media a,
+     teeb.imoveis_regioesterm b
+WHERE a.gid = b.gid AND a.cd_mun=b.cd_mun AND a.sub_class = b.sub_class
+GROUP BY a.gid, a.cd_mun, a.sub_class, b.regioes_term, b.tamanho, a.media_aptidao
+
+SELECT * FROM teeb.teeb_aptidao_imovel_media_regiao limit 10;
+
+/* Encontrar o valor máximo da aptidão média por região e tamanho do imóvel */
+-- 11 secs 602 msec.
+drop table if exists teeb.teeb_indice_aptidao;
+CREATE TABLE teeb.teeb_indice_aptidao AS
+SELECT
+gid,
+cd_mun,
+cd_uf,
+sub_class,
+regioes_term,
+tamanho,
+media_aptidao,
+MAX(media_aptidao) OVER(PARTITION BY cd_uf,tamanho) as max_value
+FROM teeb.teeb_aptidao_imovel_media_regiao
+GROUP BY gid, cd_mun, cd_uf, sub_class, regioes_term, tamanho, media_aptidao
+
+select * FROM teeb.teeb_indice_aptidao WHERE regioes_term= 'AMACRR' AND tamanho = '50-100' and cd_uf = 14
+
+/* Calculando o índice de aptidão*/
+ALTER TABLE teeb.teeb_indice_aptidao ADD COLUMN ind_aptidao float8 NULL;
+UPDATE teeb.teeb_indice_aptidao 
+   SET ind_aptidao = media_aptidao/max_value;
+
+select * FROM alocacao_rpd.etapa2_indice_aptidao ORDER BY ind_aptidao desc
+
+/* SEGUNDA PARTE: INFRAESTRUTURA */
+-- 9 min 31 secs.
+drop table if exists teeb.teeb_infra_imovel;
+CREATE TABLE teeb.teeb_infra_imovel AS
+SELECT 
+idcar_imaflora,
+infra,
+sum(area_ha) as area_infra
+FROM teeb.teeb_countpixel_aptinfra_imovel_100m 
+GROUP BY idcar_imaflora, infra
+
+select * FROM teeb.teeb_infra_imovel limit 10;
+
+-- 2 min 43 secs.
+drop table if exists teeb.teeb_infra_imovel_media;
+CREATE TABLE teeb.teeb_infra_imovel_media AS
+       SELECT a.gid as gid, a.cd_mun as cd_mun, a.area as area_imovel, a.sub_class as sub_class, 
+sum(b.area_infra*b.infra)/sum(b.area_infra) as media_infra
+FROM teeb.pa_br_landtenure_v202105_albers_imovel as a,
+     teeb.teeb_infra_imovel as b
+WHERE a.gid = b.idcar_imaflora
+group by a.gid, a.cd_mun, a.area, a.sub_class
+
+SELECT * FROM teeb.teeb_infra_imovel_media limit 10
+
+SELECT * FROM teeb.imoveis_regioesterm limit 10;
+
+select tamanho, sum(area) as areafinal
+FROM teeb.imoveis_regioesterm
+GROUP BY tamanho
+
+/* Juntar dados de infraestrutura com região do TERM-BR */
+-- 7 secs 629 msec.
+drop table if exists teeb.teeb_infra_imovel_media_regiao;
+CREATE TABLE teeb.teeb_infra_imovel_media_regiao AS
+select
+a.gid,
+a.cd_mun,
+substring(a.cd_mun::text, 1, 2)::int as cd_uf,
+a.sub_class,
+b.regioes_term,
+b.tamanho,
+a.media_infra
+FROM teeb.teeb_infra_imovel_media a,
+     teeb.imoveis_regioesterm b
+WHERE a.gid = b.gid AND a.cd_mun=b.cd_mun AND a.sub_class = b.sub_class
+GROUP BY a.gid, a.cd_mun, a.sub_class, b.regioes_term, b.tamanho, a.media_infra
+
+
+SELECT * FROM teeb.teeb_infra_imovel_media_regiao limit 10;
+
+/* Encontrar o valor máximo da aptidão média por uf e tamanho do imóvel */
+-- 17 secs 907 msec.
+drop table if exists teeb.teeb_indice_infra;
+CREATE TABLE teeb.teeb_indice_infra AS
+SELECT
+gid,
+cd_mun,
+cd_uf,
+sub_class,
+regioes_term,
+tamanho,
+media_infra,
+MAX(media_infra) OVER(PARTITION BY cd_uf,tamanho) as max_value
+FROM teeb.teeb_infra_imovel_media_regiao
+GROUP BY gid, cd_mun, cd_uf, sub_class, regioes_term, tamanho, media_infra
+
+select * FROM teeb.teeb_indice_infra WHERE regioes_term= 'AMACRR' AND tamanho = '0-50' and cd_uf = 13
+
+/* Calculando o índice de infraestrutura*/
+-- 24 secs 960 msec.
+ALTER TABLE teeb.teeb_indice_infra ADD COLUMN ind_infra float8 NULL;
+UPDATE teeb.teeb_indice_infra 
+   SET ind_infra = media_infra/max_value;
+
+select * FROM teeb.teeb_indice_infra LIMIT 10
+
+/* FINAL: Juntando índice de aptidão e de infraestrutura em uma mesma tabela */
+drop table if exists teeb.teeb_indice_aptidao_infra;
+CREATE TABLE teeb.teeb_indice_aptidao_infra AS
+SELECT
+a.gid,
+a.cd_mun,
+a.cd_uf,
+a.sub_class,
+a.regioes_term,
+a.tamanho,
+a.ind_aptidao,
+b.ind_infra
+FROM teeb.teeb_indice_aptidao a,
+      teeb.teeb_indice_infra b
+WHERE a.gid = b.gid AND a.cd_mun=b.cd_mun AND a.cd_uf=b.cd_uf AND a.sub_class = b.sub_class AND a.regioes_term = b.regioes_term AND a.tamanho = b. tamanho
+GROUP BY a.gid, a.cd_mun, a.cd_uf, a.sub_class, a.regioes_term, a.tamanho, a.ind_aptidao, b.ind_infra
+
+
+select * FROM teeb.teeb_indice_aptidao_infra LIMIT 10
+-- select * FROM alocacao_rpd.etapa2_indice_aptidao_infra where gid = '6420628'
+
