@@ -1,0 +1,137 @@
+
+--- 
+/* Solicitacao da Marcela: área recuperada em cada imovel por estado e 
+numero de imoveis que tiveram area de pastagem recuperada */ 
+
+--- AREA A SER RECUPERADA POR TAMANHO DE IMOVEL RURAL E estado
+-- C1
+DROP TABLE IF EXISTS teeb.report;
+CREATE TABLE teeb.report AS
+WITH foo as (SELECT 
+a.gid,	 
+substring(a.cd_mun::text, 1, 2)::int as cd_uf,
+CASE 
+ WHEN b.cenario1 = 100 or b.cenario1 = 1000 THEN 'Pastagem degradada' 			 
+ WHEN b.cenario1 = 300 or b.cenario1 = 3000 THEN 'Pastagem recuperada' 
+ ELSE 'NON'
+end as classes_uso,
+sum(b.area_ha) as area_c1
+FROM teeb.teeb_cpixels_cenarios_rpdalocada_v13set23 as b,
+     teeb.landtenure_v202105_4674_imovel as a	
+WHERE b.idcar_imaflora=a.gid 
+	 GROUP BY a.gid, a.cd_mun, b.cenario1)
+select
+c.gid,
+c.cd_uf,
+d.regioes_term,
+d.tamanho,
+c.classes_uso,
+sum(c.area_c1) as area_ha
+FROM foo as c
+ left join teeb.imoveis_regioesterm as d on c.gid=d.gid
+GROUP BY c.gid,c.cd_uf, d.regioes_term, d.tamanho, c.classes_uso, c.area_c1
+
+
+select 
+cd_uf,CASE 
+    WHEN cd_uf = 11  THEN 'RO'
+    WHEN cd_uf = 12  THEN 'AC'
+    WHEN cd_uf = 13  THEN 'AM'
+	WHEN cd_uf = 14  THEN 'RR'
+	WHEN cd_uf = 15  THEN 'PA'	
+	WHEN cd_uf = 16  THEN 'AP'	
+	WHEN cd_uf = 17  THEN 'TO'	
+	WHEN cd_uf = 21  THEN 'MA'	
+	WHEN cd_uf = 22  THEN 'PI'	
+	WHEN cd_uf = 23  THEN 'CE'
+	WHEN cd_uf = 24  THEN 'RN'	
+	WHEN cd_uf = 25  THEN 'PB'
+	WHEN cd_uf = 26  THEN 'PE'	
+	WHEN cd_uf = 27  THEN 'AL'
+	WHEN cd_uf = 28  THEN 'SE'	
+	WHEN cd_uf = 29  THEN 'BA'		
+	WHEN cd_uf = 31  THEN 'MG'			
+	WHEN cd_uf = 32  THEN 'ES'			
+	WHEN cd_uf = 33  THEN 'RJ'			
+	WHEN cd_uf = 35  THEN 'SP'				
+	WHEN cd_uf = 41  THEN 'PR'					
+	WHEN cd_uf = 42  THEN 'SC'					
+	WHEN cd_uf = 43  THEN 'RS'					
+	WHEN cd_uf = 50  THEN 'MS'
+	WHEN cd_uf = 51  THEN 'MT'	
+	WHEN cd_uf = 52  THEN 'GO'	
+	WHEN cd_uf = 53  THEN 'DF'	
+END sigla_uf,
+tamanho,
+sum(area_ha) as area_ha,
+count(gid) as num_imoveis
+from teeb.report WHERE classes_uso != 'NON' and classes_uso != 'Pastagem degradada' 
+group by cd_uf, tamanho, sigla_uf
+
+
+-- C2
+DROP TABLE IF EXISTS teeb.report;
+CREATE TABLE teeb.report AS
+WITH foo as (SELECT 
+a.gid,	 
+substring(a.cd_mun::text, 1, 2)::int as cd_uf,
+CASE 
+ WHEN b.cenario2 = 100 or b.cenario2 = 1000 THEN 'Pastagem degradada' 			 
+ WHEN b.cenario2 = 200 or b.cenario2 = 2000 THEN 'Pastagem recuperada com iLP' 
+ WHEN b.cenario2 = 300 or b.cenario2 = 3000 THEN 'Pastagem recuperada' 
+ ELSE 'NON'
+end as classes_uso,
+sum(b.area_ha) as area_c2
+FROM teeb.teeb_cpixels_cenarios_rpdalocada_v13set23 as b,
+     teeb.landtenure_v202105_4674_imovel as a	
+WHERE b.idcar_imaflora=a.gid 
+	 GROUP BY a.gid, a.cd_mun, b.cenario2)
+select
+c.gid,
+c.cd_uf,
+d.regioes_term,
+d.tamanho,
+c.classes_uso,
+sum(c.area_c2) as area_ha
+FROM foo as c
+ left join teeb.imoveis_regioesterm as d on c.gid=d.gid
+GROUP BY c.gid,c.cd_uf, d.regioes_term, d.tamanho, c.classes_uso, c.area_c2
+
+
+select 
+cd_uf,
+CASE 
+    WHEN cd_uf = 11  THEN 'RO'
+    WHEN cd_uf = 12  THEN 'AC'
+    WHEN cd_uf = 13  THEN 'AM'
+	WHEN cd_uf = 14  THEN 'RR'
+	WHEN cd_uf = 15  THEN 'PA'	
+	WHEN cd_uf = 16  THEN 'AP'	
+	WHEN cd_uf = 17  THEN 'TO'	
+	WHEN cd_uf = 21  THEN 'MA'	
+	WHEN cd_uf = 22  THEN 'PI'	
+	WHEN cd_uf = 23  THEN 'CE'
+	WHEN cd_uf = 24  THEN 'RN'	
+	WHEN cd_uf = 25  THEN 'PB'
+	WHEN cd_uf = 26  THEN 'PE'	
+	WHEN cd_uf = 27  THEN 'AL'
+	WHEN cd_uf = 28  THEN 'SE'	
+	WHEN cd_uf = 29  THEN 'BA'		
+	WHEN cd_uf = 31  THEN 'MG'			
+	WHEN cd_uf = 32  THEN 'ES'			
+	WHEN cd_uf = 33  THEN 'RJ'			
+	WHEN cd_uf = 35  THEN 'SP'				
+	WHEN cd_uf = 41  THEN 'PR'					
+	WHEN cd_uf = 42  THEN 'SC'					
+	WHEN cd_uf = 43  THEN 'RS'					
+	WHEN cd_uf = 50  THEN 'MS'
+	WHEN cd_uf = 51  THEN 'MT'	
+	WHEN cd_uf = 52  THEN 'GO'	
+	WHEN cd_uf = 53  THEN 'DF'	
+END sigla_uf,
+tamanho,
+classes_uso,
+sum(area_ha) as area_ha,
+count(gid) as num_imoveis
+from teeb.report WHERE classes_uso != 'NON' and classes_uso != 'Pastagem degradada' 
+group by cd_uf, sigla_uf, tamanho, classes_uso
