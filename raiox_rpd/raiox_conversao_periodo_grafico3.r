@@ -8,7 +8,7 @@ p_load( raster, rgdal,   dplyr, ggplot2,RPostgres, tidyr, ggrepel, tidyverse, fo
 install.packages('BiocManager')
 
 tryCatch({
-  drv <- dbDriver("PostgreSQL")
+  drv <- RPostgres::Postgres()
   print("Connecting to Database…")
   connec_local <- dbConnect(drv, 
                             dbname = 'postgres',
@@ -31,7 +31,7 @@ a.idcar_imaflora,
 b.cd_uf,	
 b.tamanho,
 sum(a.cpd1020) as acum_cpd
-FROM teeb_raiox_conversao_corr_newagri as a
+FROM public.teeb_raiox_conversao_corr_newagri as a
 	left join teeb.imoveis_regioesterm as b 
 	on a.municipios IS NOT NULL and a.idcar_imaflora != 0 AND b.gid != 0  AND a.idcar_imaflora = b.gid and b.cd_uf is not null 
 GROUP BY a.idcar_imaflora, b.cd_uf, b.tamanho)
@@ -45,15 +45,9 @@ group by tamanho")
 
 
 
-dt
-dt1
+class(dt$num_imoveis)
+dt$num_imoveis <- as.numeric(dt$num_imoveis)
 dt$tamanho <- factor(dt$tamanho, levels = c("0-50","50-100","100-500","500-1000",">1000 "))
-
-
-#my_order <-c("0-50","50-100","100-500","500-1000",">1000 ")
-#dt = within(dt, 
-#            tamanho <- factor(tamanho, 
-#                              levels=my_order))
 
 
 categorias_pallete <- c(
@@ -66,7 +60,7 @@ categorias_pallete <- c(
 
 
 dt1 <- dt[c(1,2)]
-dt1$perc <- dt$num_imoveis/sum(dt$num_imoveis)
+dt1$perc1 <- dt$num_imoveis/sum(dt$num_imoveis)
 
 
 dt1_label <- 
@@ -79,7 +73,7 @@ dt1_label <-
 options(OutDec=",")
 p1 <- dt1_label %>%
   ggplot(aes(x = "", y = num_imoveis, fill = tamanho)) +
-  geom_bar(stat = "identity",width=1, color="white",show.legend = FALSE) +
+  geom_bar(stat = "identity",width=1, color="white") +
   #ggtitle("Número de imóveis (mil) - CPD") +
   coord_polar("y", start = 0) +
   theme_void() +
@@ -88,14 +82,14 @@ p1 <- dt1_label %>%
         legend.title = element_text(size = 20))+
   #geom_text(aes(y= text_y, label = paste0(round(Area, 1),' (', round(Perc1,1), '%)')), color = "white", size=6) +
   #geom_text(aes(label = paste0(round(Area, 1),' (', round(Perc1,1), '%)')),size = 12,position = position_fill(vjust = 0.5), show.legend = F) +
-  #geom_label_repel(aes(label = paste0(round(perc*100), '%'),y = text_y), 
+  geom_label_repel(aes(label = paste0(round(num_imoveis, 1),' (', round(perc*100,1), '%)'),y = text_y), 
                    #nudge_x = 0.6, nudge_y = 0.6,
                    #position = position_fill(vjust = 0.5), 
-   #                size = 6, show.legend = F) +
+                   size = 5, show.legend = F) +
   scale_fill_manual('Tamanho do imóvel', values = categorias_pallete); p1
 
-#ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/cpd_novaagri_numero.pdf', plot = p1, units = 'in', dpi = 300, scale = 0.6)
-ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/cpd_novaagri_numero_sn.pdf', plot = p1, units = 'in', dpi = 300, scale = 0.6)
+#ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/cpd_corrigido_numero.pdf', plot = p1, units = 'in', dpi = 300, scale = 0.6)
+#ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/cpd_corrigido_numero_sn.pdf', plot = p1, units = 'in', dpi = 300, scale = 0.6)
  
 ## ÁREA
 dt2 <- dt[c(1,3)]
@@ -121,20 +115,21 @@ p2 <- dt2_label %>%
         legend.title = element_text(size = 20))+
   #geom_text(aes(y= text_y, label = paste0(round(Area, 1),' (', round(Perc1,1), '%)')), color = "white", size=6) +
   #geom_text(aes(label = paste0(round(Area, 1),' (', round(Perc1,1), '%)')),size = 12,position = position_fill(vjust = 0.5), show.legend = F) +
-  geom_label_repel(aes(label = paste0(round(perc*100), '%'),y = text_y), 
+  #geom_label_repel(aes(label = paste0(round(perc*100), '%'),y = text_y), 
+  geom_label_repel(aes(label = paste0(round(area_cpd_ha, 1),'Mha (', round(perc*100,1), '%)'),y = text_y),                    
                    #nudge_x = 0.6, nudge_y = 0.6,
                    #position = position_fill(vjust = 0.5), 
                   size = 5, show.legend = F) +
   scale_fill_manual('Tamanho do imóvel', values = categorias_pallete); p2
 
-ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/cpd_novaagri_area.pdf', plot = p2, units = 'in', dpi = 300, scale = 0.6)
-#ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/cpd_novaagri_aarea_sn.pdf', plot = p2, units = 'in', dpi = 300, scale = 0.6)
+#ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/cpd_corrigido_area.pdf', plot = p2, units = 'in', dpi = 300, scale = 0.6)
+#ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/mapas/reclassificacao/cpd_corrigido_aarea_sn.pdf', plot = p2, units = 'in', dpi = 300, scale = 0.6)
 
 library(cowplot)
 t <- ggdraw() +
-  draw_plot(p2, 0,0.5,0.5,0.5,0.85) +
+  draw_plot(p2, 0,0.5,0.5,0.5,0.8) +
   draw_plot(p1, 0.5,0.5,.5,.5) 
   #draw_plot_label(c("a)", "b)"), c(0.25, 0.75), c(0.5, 0.5), size = 20)
-ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/conversao_cpd_periodo_tamanhoimovel_16nov23.png', plot = t,units = 'in', dpi = 300, scale = 1.5)
+ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/conversao_cpd_periodo_tamanhoimovel_28nov23_newagri.png', plot = t,units = 'in', dpi = 300, scale = 1.5)
 #ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/recuperacao_rpd_tamanhoimovel2.png', plot = t,width = 10, height=12,units = 'in', dpi = 300, scale = 1.5)
 t

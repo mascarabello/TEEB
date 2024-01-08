@@ -29,17 +29,17 @@ start <- Sys.time()
 dt <- dbGetQuery(connec_local , "WITH FOO as (select 
 substring(municipios::text, 1, 2)::int as cd_uf,
 sum(cpd1020) as acum_cpd,
-sum(pd1020) as acum_pd,
+sum(daa1020) as acum_daa,
 CASE 
 	WHEN idcar_imaflora > 0 THEN 'dentro de imóvel rural'
     else 'fora de imóvel rural'
 END dentrofora_imovel
-from public.teeb_raiox_conversao_final
+from public.teeb_raiox_conversao_corr_newagri
 WHERE idcar_imaflora IS NOT NULL AND municipios IS NOT NULL
 group by cd_uf,dentrofora_imovel)
 select 
 sum(acum_cpd)/1000000 as CPD,
-sum(acum_pd)/1000000 as DAA,
+sum(acum_daa)/1000000 as DAA,
 dentrofora_imovel
 from FOO
 group by dentrofora_imovel")
@@ -67,5 +67,5 @@ p1 <- ggplot(data = dados_processados , aes(x=categoria_label,y = area_mha,fill=
                                    legend.text = element_text(size = 20));p1
 
 
-ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/convertido_degradado_dentrofora.png', plot = p1, units = 'in', dpi = 300, scale = 1.5)
+ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/convertido_degradado_dentrofora_28nov23_newagri.png', plot = p1, units = 'in', dpi = 300, scale = 1.5)
 
