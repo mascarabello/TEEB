@@ -50,7 +50,7 @@ dados_processados <- dt %>%
   gather(categoria, area_mha, -dentrofora_imovel) %>%
   mutate(
     categoria = factor(categoria, levels = c("rpd", "pd")),
-    categoria_label = ifelse(categoria == "rpd", "RPD", "PD")
+    categoria_label = ifelse(categoria == "rpd", "RPD", "DP")
   )
 
 colnames(dt)
@@ -67,5 +67,5 @@ p1 <- ggplot(data = dados_processados , aes(x=categoria_label,y = area_mha,fill=
                                    legend.text = element_text(size = 20));p1
 
 
-ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/recuperado_degradado_dentrofora.png', plot = p1, units = 'in', dpi = 300, scale = 1.5)
+ggsave(filename = '/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/recuperado_degradado_dentrofora_28NOV23.png', plot = p1, units = 'in', dpi = 300, scale = 1.5)
 

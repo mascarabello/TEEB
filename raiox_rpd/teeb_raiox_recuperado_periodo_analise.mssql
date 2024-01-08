@@ -1,0 +1,155 @@
+select * from public.teeb_raiox_conversao_final_2010_2020 limit 10
+
+select * from public.teeb_raiox_conversao_final_2010_2020V2 limit 10
+
+/* 
+id serial4 NOT NULL,
+idcar_imaflora integer NULL,
+municipios integer NULL,
+cpd1020 float8 null,
+daa1020 float8 null,
+area_ha float8 NULL
+*/
+
+-- Dados para o gráfico 1 - Área do período, dentro e fora de imóveis rurais.
+WITH FOO as (select 
+substring(municipios::text, 1, 2)::int as cd_uf,
+sum(cpd1020) as acum_cpd,
+sum(daa1020) as acum_daa,
+CASE 
+	WHEN idcar_imaflora > 0 THEN 'dentro'
+    else 'fora'
+END dentrofora_imovel
+from public.teeb_raiox_conversao_final_2010_2020v3
+WHERE idcar_imaflora IS NOT NULL AND municipios IS NOT NULL
+group by cd_uf,dentrofora_imovel)
+select 
+sum(acum_cpd)/1000000 as area_cpd_mha,
+sum(acum_daa)/1000000 as area_daa_mha,
+dentrofora_imovel
+from FOO
+group by dentrofora_imovel
+
+
+1.228676	0.484103	"fora"
+9.458568	1.957967	"dentro"
+
+
+WITH foo as (
+SELECT 
+a.idcar_imaflora,
+b.cd_uf,	
+b.tamanho,
+sum(a.rpd1020) as acum_rpd
+--sum(a.pd1020) as acum_pd
+FROM public.teeb_raiox_recuperacao2_final as a
+	left join teeb.imoveis_regioesterm as b 
+	on a.municipios IS NOT NULL and a.idcar_imaflora != 0 AND b.gid != 0  AND a.idcar_imaflora = b.gid and b.cd_uf is not null 
+GROUP BY a.idcar_imaflora, b.cd_uf, b.tamanho)
+select 
+cd_uf,
+--count(distinct idcar_imaflora) as num_imoveis,
+sum(acum_rpd) as area_rpd_ha
+FROM foo
+where acum_rpd > 0 AND tamanho IS NOT NULL
+group by cd_uf
+
+
+
+
+
+-- Tabela 1 -- Área do período, dentro e fora de imóveis rurais por estado
+WITH FOO as (select 
+substring(municipios::text, 1, 2)::int as cd_uf,
+sum(rpd1020) as acum_rpd,
+sum(pd1020) as acum_pd,
+CASE 
+	WHEN idcar_imaflora > 0 THEN 'dentro'
+    else 'fora'
+END dentrofora_imovel
+from public.teeb_raiox_recuperacao2_final
+WHERE idcar_imaflora IS NOT NULL AND municipios IS NOT NULL
+group by cd_uf,dentrofora_imovel)
+select 
+cd_uf,
+sum(acum_rpd)/1000 as area_rpd_mha,
+sum(acum_pd)/1000 as area_pd_mha,
+dentrofora_imovel
+from FOO
+group by cd_uf, dentrofora_imovel
+
+
+-- dado para mapa - área de rpD 
+WITH foo as (
+SELECT 
+a.idcar_imaflora,
+b.cd_uf,	
+b.tamanho,
+sum(a.rpd1020) as acum_rpd
+FROM public.teeb_raiox_recuperacao2_final as a
+	left join teeb.imoveis_regioesterm as b 
+	on a.municipios IS NOT NULL and a.idcar_imaflora != 0 AND b.gid != 0  AND a.idcar_imaflora = b.gid and b.cd_uf is not null 
+GROUP BY a.idcar_imaflora, b.cd_uf, b.tamanho)
+select 
+tamanho,
+count(distinct idcar_imaflora) as num_imoveis,
+sum(acum_rpd)/1000 as area_rpd_ha
+FROM foo
+where acum_rpd > 0 AND tamanho IS NOT NULL
+group by cd_uf,tamanho
+
+
+WITH foo as (
+SELECT 
+a.idcar_imaflora,
+b.cd_uf,	
+b.tamanho,
+sum(a.rpd1020) as acum_rpd
+FROM public.teeb_raiox_recuperacao2_final as a
+	left join teeb.imoveis_regioesterm as b 
+	on a.municipios IS NOT NULL and a.idcar_imaflora != 0 AND b.gid != 0  AND a.idcar_imaflora = b.gid and b.cd_uf is not null 
+GROUP BY a.idcar_imaflora, b.cd_uf, b.tamanho)
+select 
+count(distinct idcar_imaflora) as num_imoveis,
+sum(acum_rpd)/1000 as area_rpd_ha
+FROM foo
+where acum_rpd > 0 AND tamanho IS NOT NULL
+group by cd_uf
+
+-- dado para mapa - área de rpd 
+WITH foo as (
+SELECT 
+a.idcar_imaflora,
+b.cd_uf,	
+b.tamanho,
+sum(a.pd1020) as acum_pd
+FROM public.teeb_raiox_recuperacao2_final as a
+	left join teeb.imoveis_regioesterm as b 
+	on a.municipios IS NOT NULL and a.idcar_imaflora != 0 AND b.gid != 0  AND a.idcar_imaflora = b.gid and b.cd_uf is not null 
+GROUP BY a.idcar_imaflora, b.cd_uf, b.tamanho)
+select 
+tamanho,
+count(distinct idcar_imaflora) as num_imoveis,
+sum(acum_pd)/1000 as area_pd_ha
+FROM foo
+where acum_pd > 0 AND tamanho IS NOT NULL
+group by cd_uf,tamanho
+
+WITH foo as (
+SELECT 
+a.idcar_imaflora,
+b.cd_uf,	
+b.tamanho,
+sum(a.pd1020) as acum_pd
+FROM public.teeb_raiox_recuperacao2_final as a
+	left join teeb.imoveis_regioesterm as b 
+	on a.municipios IS NOT NULL and a.idcar_imaflora != 0 AND b.gid != 0  AND a.idcar_imaflora = b.gid and b.cd_uf is not null 
+GROUP BY a.idcar_imaflora, b.cd_uf, b.tamanho)
+select 
+cd_uf,
+count(distinct idcar_imaflora) as num_imoveis,
+sum(acum_pd)/1000 as area_pd_ha
+FROM foo
+where acum_pd > 0 AND tamanho IS NOT NULL
+group by cd_uf
+

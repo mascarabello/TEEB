@@ -1,0 +1,280 @@
+-- Script para gerar recultados para raio-x da RPD no Brasil entre 2010-2020
+-- Marluce Scarabello
+-- 8 nov 2023
+
+--- RECUPERAÇÃO
+--- PRD_anointanofinal - Pastagem recuperada que degradou no ano final
+--- PRR_anointanofinal - Pastagem recuperada que continuou recuperada no ano final
+--- RPD_anointanofinal - Recuperação de Pastagem degrada
+--- PD_anointanofinal - Degradação de Pastagem degrada
+
+
+-- Lendo a tabela com a contagem de pixel para recuperacao. 
+
+select * from teeb_raiox_recuperacao2_final limit 10
+
+/*
+prd
+rpd0910
+rpd1011
+rpd1112
+rpd1213
+rpd1314
+rpd1415
+rpd1516
+rpd1617
+rpd1718
+rpd1819
+rpd1920
+rpd1020
+rpd1015
+rpd1520
+pd0910
+pd1011
+pd1112
+pd1213
+pd1314
+pd1415
+pd1516
+pd1617
+pd1718
+pd1819
+pd1920
+pd1020
+pd1015
+pd1520
+area_ha
+*/
+
+-- Dados para o gráfico 1 - Área anual de restauração e degradação de pastagens
+
+select
+sum(rpd1011)/1000 as rp2011,
+sum(rpd1112)/1000 as rp2012,
+sum(rpd1213)/1000 as rp2013,
+sum(rpd1314)/1000 as rp2014,
+sum(rpd1415)/1000 as rp2015,
+sum(rpd1516)/1000 as rp2016,
+sum(rpd1617)/1000 as rp2017,
+sum(rpd1718)/1000 as rp2018,
+sum(rpd1819)/1000 as rp2019,
+sum(rpd1920)/1000 as rp2020,
+sum(pd1011)/1000 as pd2011,
+sum(pd1112)/1000 as pd2012,
+sum(pd1213)/1000 as pd2013,
+sum(pd1314)/1000 as pd2014,
+sum(pd1415)/1000 as pd2015,
+sum(pd1516)/1000 as pd2016,
+sum(pd1617)/1000 as pd2017,
+sum(pd1718)/1000 as pd2018,
+sum(pd1819)/1000 as pd2019,
+sum(pd1920)/1000 as pd2020
+from teeb_raiox_recuperacao2_final
+WHERE idcar_imaflora IS NOT NULL AND municipios IS NOT NULL
+
+-- TÁrea de RPD e PR acumulada 
+DROP TABLE IF EXISTS teeb.raiox_recuperacao_acumulada;
+CREATE TABLE teeb.raiox_recuperacao_acumulada AS
+SELECT 
+idcar_imaflora,
+municipios,
+sum(rpd1011) + sum(rpd1112) + sum(rpd1213) + sum(rpd1314) + sum(rpd1415) + sum(rpd1516) + sum(rpd1617) + sum(rpd1718) + sum(rpd1819) + sum(rpd1920) as acum_rpd,
+sum(pd1011) + sum(pd1112) + sum(pd1213) + sum(pd1314) +  sum(pd1415) + sum(pd1516) + sum(pd1617) + sum(pd1718) + sum(pd1819) + sum(pd1920) as acum_pd
+from teeb_raiox_recuperacao2_final
+WHERE idcar_imaflora IS NOT NULL AND municipios IS NOT NULL	
+GROUP BY idcar_imaflora, municipios
+
+
+select 
+sum(acum_rpd)/1000 as rpd_acum2010_2020,
+sum(acum_pd)/1000 as pd_acum2010_2020
+FROM teeb.raiox_recuperacao_acumulada 
+
+
+
+-- Tabela 1 - Área de RPD e PR acumulada por estado (dentro e fora de imóvel)
+select 
+substring(municipios::text, 1, 2)::int as cd_uf,
+sum(acum_rpd)/1000 as rpd_acum2010_2020,
+sum(acum_pd)/1000 as pd_acum2010_2020
+FROM teeb.raiox_recuperacao_acumulada 
+group by cd_uf
+
+-- INFORMACAO 2 - Area de RPD E PD DENTRO E FORA DE IMÓVEL
+WITH FOO as (select 
+substring(municipios::text, 1, 2)::int as cd_uf,
+sum(acum_rpd) as area_rpd_acc,
+sum(acum_pd) as area_pd_acc,
+CASE 
+	WHEN idcar_imaflora > 0 THEN 'dentro'
+    else 'fora'
+END dentrofora_imovel
+from teeb.raiox_recuperacao_acumulada
+WHERE idcar_imaflora IS NOT NULL AND municipios IS NOT NULL
+group by cd_uf,dentrofora_imovel)
+select 
+sum(area_rpd_acc)/1000000 as area_rpd_mha,
+sum(area_pd_acc)/1000000 as area_pd_mha,
+dentrofora_imovel
+from FOO
+group by dentrofora_imovel
+
+
+-- Grafico 2 - Grafico em coluna para definir area dentro e fora do imovel por grande regiao
+WITH FOO as (select 
+substring(municipios::text, 1, 2)::int as cd_uf,
+sum(acum_rpd) as area_rpd_acc,
+sum(acum_pd) as area_pd_acc,
+CASE 
+	WHEN idcar_imaflora > 0 THEN 'dentro'
+    else 'fora'
+END dentrofora_imovel
+from teeb.raiox_recuperacao_acumulada
+WHERE idcar_imaflora IS NOT NULL AND municipios IS NOT NULL
+group by cd_uf,dentrofora_imovel)
+SELECT 
+CASE 
+    WHEN cd_uf = 11  THEN 'Norte'
+    WHEN cd_uf = 12  THEN 'Norte'
+    WHEN cd_uf = 13  THEN 'Norte'
+	WHEN cd_uf = 14  THEN 'Norte'
+	WHEN cd_uf = 15  THEN 'Norte'
+	WHEN cd_uf = 16  THEN 'Norte'
+	WHEN cd_uf = 17  THEN 'Norte'
+	WHEN cd_uf = 21  THEN 'Nordeste'	
+	WHEN cd_uf = 22  THEN 'Nordeste'
+	WHEN cd_uf = 23  THEN 'Nordeste'
+	WHEN cd_uf = 24  THEN 'Nordeste'
+	WHEN cd_uf = 25  THEN 'Nordeste'
+	WHEN cd_uf = 26  THEN 'Nordeste'
+	WHEN cd_uf = 27  THEN 'Nordeste'
+	WHEN cd_uf = 28  THEN 'Nordeste'
+	WHEN cd_uf = 29  THEN 'Nordeste'
+	WHEN cd_uf = 31  THEN 'Sudeste'	
+	WHEN cd_uf = 32  THEN 'Sudeste'	
+	WHEN cd_uf = 33  THEN 'Sudeste'	
+	WHEN cd_uf = 35  THEN 'Sudeste'		
+	WHEN cd_uf = 41  THEN 'Sul'					
+	WHEN cd_uf = 42  THEN 'Sul'					
+	WHEN cd_uf = 43  THEN 'Sul'					
+	WHEN cd_uf = 50  THEN 'Centro-Oeste'
+	WHEN cd_uf = 51  THEN 'Centro-Oeste'
+	WHEN cd_uf = 52  THEN 'Centro-Oeste'
+	WHEN cd_uf = 53  THEN 'Centro-Oeste'
+END regiao,
+dentrofora_imovel,
+sum(area_rpd_acc)/1000000 as arearpd_ha,
+sum(area_pd_acc)/1000000 as arearpd_ha
+from foo
+group by dentrofora_imovel, regiao
+
+
+-- Grafico 3 -	Gráfico em pizza com área e número de imóveis de RPD para o Brasil (4 gráficos)
+WITH foo as (
+SELECT 
+a.idcar_imaflora,
+b.cd_uf,	
+b.tamanho,
+sum(a.rpd1011) + sum(a.rpd1112) + sum(a.rpd1213) + sum(a.rpd1314) + sum(a.rpd1415) + sum(a.rpd1516) + sum(a.rpd1617) + sum(a.rpd1718) + sum(a.rpd1819) + sum(a.rpd1920) as acum_rpd
+FROM public.teeb_raiox_recuperacao2_final as a
+	left join teeb.imoveis_regioesterm as b 
+	on a.municipios IS NOT NULL and a.idcar_imaflora != 0 AND b.gid != 0  AND a.idcar_imaflora = b.gid and b.cd_uf is not null 
+GROUP BY a.idcar_imaflora, b.cd_uf, b.tamanho)
+select 
+tamanho,
+count(distinct idcar_imaflora) as num_imoveis,
+sum(acum_rpd) as area_rpd_ha
+FROM foo
+where acum_rpd > 0 AND tamanho IS NOT NULL
+group by tamanho
+
+/*
+WITH foo as (
+SELECT 
+a.idcar_imaflora,
+b.cd_uf,	
+b.tamanho,
+sum(a.rpd1020) as acum_rpd
+FROM public.teeb_raiox_recuperacao2_final as a
+	left join teeb.imoveis_regioesterm as b 
+	on a.municipios IS NOT NULL and a.idcar_imaflora != 0 AND b.gid != 0  AND a.idcar_imaflora = b.gid and b.cd_uf is not null 
+GROUP BY a.idcar_imaflora, b.cd_uf, b.tamanho)
+select 
+tamanho,
+count(distinct idcar_imaflora) as num_imoveis,
+sum(acum_rpd) as area_rpd_ha
+FROM foo
+where acum_rpd > 0 AND tamanho IS NOT NULL
+group by tamanho
+*/
+
+-- Grafico 4 -	Gráfico em pizza com área e número de imóveis de PD para o Brasil 
+WITH foo as (
+SELECT 
+a.idcar_imaflora,
+b.cd_uf,	
+b.tamanho,
+sum(a.pd1011) + sum(a.pd1112) + sum(a.pd1213) + sum(a.pd1314) +  sum(a.pd1415) + sum(a.pd1516) + sum(a.pd1617) + sum(a.pd1718) + sum(a.pd1819) + sum(a.pd1920) as acum_pd
+FROM public.teeb_raiox_recuperacao2_final as a
+	left join teeb.imoveis_regioesterm as b 
+	on a.municipios IS NOT NULL and a.idcar_imaflora != 0 AND b.gid != 0  AND a.idcar_imaflora = b.gid and b.cd_uf is not null 
+GROUP BY a.idcar_imaflora, b.cd_uf, b.tamanho)
+select 
+tamanho,
+count(distinct idcar_imaflora)/1000 as num_imoveis,
+sum(acum_pd)/1000 as area_pd_ha
+FROM foo
+where acum_pd > 0 AND tamanho IS NOT NULL
+group by tamanho
+
+--- TABELA 2 - ÁREA DE rpd por tamanho de imóvel e estado
+WITH foo as (
+SELECT 
+a.idcar_imaflora,
+b.cd_uf,	
+b.tamanho,
+sum(a.rpd1011) + sum(a.rpd1112) + sum(a.rpd1213) + sum(a.rpd1314) + sum(a.rpd1415) + sum(a.rpd1516) + sum(a.rpd1617) + sum(a.rpd1718) + sum(a.rpd1819) + sum(a.rpd1920) as acum_rpd
+FROM public.teeb_raiox_recuperacao2_final as a
+	left join teeb.imoveis_regioesterm as b 
+	on a.municipios IS NOT NULL and a.idcar_imaflora != 0 AND b.gid != 0  AND a.idcar_imaflora = b.gid and b.cd_uf is not null 
+GROUP BY a.idcar_imaflora, b.cd_uf, b.tamanho)
+select 
+cd_uf,
+tamanho,
+--count(distinct idcar_imaflora) as num_imoveis,
+sum(acum_rpd) as area_rpd_ha
+FROM foo
+where acum_rpd > 0 AND tamanho IS NOT NULL
+group by cd_uf, tamanho
+
+--- TABELA 3 - Área de PD por tamanho de imóvel e estado
+WITH foo as (
+SELECT 
+a.idcar_imaflora,
+b.cd_uf,	
+b.tamanho,
+sum(a.pd1011) + sum(a.pd1112) + sum(a.pd1213) + sum(a.pd1314) +  sum(a.pd1415) + sum(a.pd1516) + sum(a.pd1617) + sum(a.pd1718) + sum(a.pd1819) + sum(a.pd1920) as acum_pd
+FROM public.teeb_raiox_recuperacao2_final as a
+	left join teeb.imoveis_regioesterm as b 
+	on a.municipios IS NOT NULL and a.idcar_imaflora != 0 AND b.gid != 0  AND a.idcar_imaflora = b.gid and b.cd_uf is not null 
+GROUP BY a.idcar_imaflora, b.cd_uf, b.tamanho)
+select 
+cd_uf,
+tamanho,
+--count(idcar_imaflora) as num_imoveis,
+sum(acum_pd) as area_pd_ha
+FROM foo
+where acum_pd > 0 AND tamanho IS NOT NULL
+group by cd_uf, tamanho
+
+select
+*
+from foo 
+where cd_uf = 11 and tamanho = '>1000 '
+
+
+
+select * FROM teeb.pa_br_landtenure_v202105_albers_imovel LIMIT 10
+
+
+SELECT * FROM teeb.imoveis_regioesterm limit 10
