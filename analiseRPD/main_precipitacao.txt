@@ -1,0 +1,37 @@
+// Defina a geometria para o Brasil
+var brazil = ee.FeatureCollection('USDOS/LSIB_SIMPLE/2017')
+  .filter(ee.Filter.eq('country_na', 'Brazil'));
+var brazilGeometry = brazil.geometry();
+
+
+// Define as datas de início e término
+var startYear = 2000;
+var endYear = 2022;
+
+// Carregue o conjunto de dados TerraClimate
+var dataset = ee.ImageCollection('IDAHO_EPSCOR/TERRACLIMATE');
+
+for (var year = startYear; year <= endYear; year++) {
+  var currentYearData = dataset
+    .filter(ee.Filter.date(year + '-01-01', year + '-12-31'))
+    .filterBounds(brazilGeometry);
+
+  // Calcule a precipitação acumulada anual
+  var annualPrecipitation = currentYearData.select('pr')
+    .sum()
+    .rename('annual_precipitation');
+
+
+var annualPrecipitation_float = annualPrecipitation.toDouble();
+
+// Exporte os dados para o Google Drive para o ano atual
+  Export.image.toDrive({
+    image: annualPrecipitation_float,
+    description: 'terraclimate_brazil_annual_precipitation_' + year,
+    folder : "terraclimate",
+//    scale: scale,
+    region: brazilGeometry,
+    maxPixels: 1e13
+  });
+
+} 
