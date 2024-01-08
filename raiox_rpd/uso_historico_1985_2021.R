@@ -15,6 +15,9 @@ setwd("/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/rasters")
 
 municipios <- raster("municipios_albers.tif"); municipios; 
 uso1985 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_1985_albers_corrigido.tif"); uso1985;
+uso1986 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_1986_albers_corrigido.tif"); uso1986;
+uso1990 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_1990_albers_corrigido.tif"); uso1990;
+uso1995 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_1995_albers_corrigido.tif"); uso1995;
 uso2000 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2000_albers_corrigido.tif"); uso2000;
 uso2005 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2005_albers_corrigido.tif"); uso2005;
 uso2010 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2010_albers_corrigido.tif"); uso2010;
@@ -30,11 +33,13 @@ uso2021 <- raster("pa_br_usoterra_mapbiomas7_lapig_100m_2021_albers_corrigido.ti
 bss <- blockSize(municipios); bss$n
 
 
-y <- data.frame(municipios = NA, pastagem = NA, agricultura = NA, usoanterior2000 = NA, usoanterior2005=NA, usoanterior2010=NA, 
-                usoanterior2015 =NA, usoanterior2018 = NA, usoanterior2019 = NA, usoanterior2020 =NA, area_ha = NA)
+y <- data.frame(municipios = NA, pastagem = NA, agricultura = NA, usoanterior = NA, area_ha = NA)
 system.time(for (i in 1:bss$n) {
   dt <- data.table(municipios = getValues(municipios, row = bss$row[i], nrows = bss$nrows[i]),
                    uso1985 = getValues(uso1985, row = bss$row[i], nrows = bss$nrows[i]),
+                   uso1986 = getValues(uso1986, row = bss$row[i], nrows = bss$nrows[i]),
+                   uso1990 = getValues(uso1990, row = bss$row[i], nrows = bss$nrows[i]),
+                   uso1995 = getValues(uso1995, row = bss$row[i], nrows = bss$nrows[i]),                   
                    uso2000 = getValues(uso2000, row = bss$row[i], nrows = bss$nrows[i]),
                    uso2005 = getValues(uso2005, row = bss$row[i], nrows = bss$nrows[i]),
                    uso2010 = getValues(uso2010, row = bss$row[i], nrows = bss$nrows[i]),
@@ -47,18 +52,11 @@ system.time(for (i in 1:bss$n) {
   
   dt$pastagem <- ifelse(dt$uso2021 %in% c(15), dt$uso1985,1000)
   dt$agricultura <- ifelse(dt$uso2021 %in% c(20, 39, 40, 41, 46, 47, 48, 62), dt$uso1985,1000)
-  dt$usoanterior2000 <- ifelse(dt$uso2021 %in% c(20, 39, 40, 41, 46, 47, 48, 62) & dt$uso1985 %in% c(3, 4, 5, 11, 13, 49, 50), dt$uso2000,1000)  
-  dt$usoanterior2005 <- ifelse(dt$uso2021 %in% c(20, 39, 40, 41, 46, 47, 48, 62) & dt$uso1985 %in% c(3, 4, 5, 11, 13, 49, 50), dt$uso2005,1000)  
-  dt$usoanterior2010 <- ifelse(dt$uso2021 %in% c(20, 39, 40, 41, 46, 47, 48, 62) & dt$uso1985 %in% c(3, 4, 5, 11, 13, 49, 50), dt$uso2010,1000)  
-  dt$usoanterior2015 <- ifelse(dt$uso2021 %in% c(20, 39, 40, 41, 46, 47, 48, 62) & dt$uso1985 %in% c(3, 4, 5, 11, 13, 49, 50), dt$uso2015,1000)  
-  dt$usoanterior2018 <- ifelse(dt$uso2021 %in% c(20, 39, 40, 41, 46, 47, 48, 62) & dt$uso1985 %in% c(3, 4, 5, 11, 13, 49, 50), dt$uso2018,1000)    
-  dt$usoanterior2019 <- ifelse(dt$uso2021 %in% c(20, 39, 40, 41, 46, 47, 48, 62) & dt$uso1985 %in% c(3, 4, 5, 11, 13, 49, 50), dt$uso2019,1000)    
-  dt$usoanterior2020 <- ifelse(dt$uso2021 %in% c(20, 39, 40, 41, 46, 47, 48, 62) & dt$uso1985 %in% c(3, 4, 5, 11, 13, 49, 50), dt$uso2020,1000)      
-  
+  dt$usoanterior <- ifelse(dt$uso2021 %in% c(20, 39, 40, 41, 46, 47, 48, 62) & dt$uso1985 %in% c(3, 4, 5, 11, 13, 49, 50) &
+                    (dt$uso1986 == 15 | dt$uso1990 == 15 | dt$uso1995 == 15 | dt$uso2000 == 15 |  dt$uso2005 == 15 | dt$uso2010 == 15| dt$uso2015 == 15| dt$uso2018 == 15 | dt$uso2019 == 15 | dt$uso2020 == 15), 1,1000)  
   
   x <- dt %>%
-    group_by(municipios,pastagem,agricultura,usoanterior2000,usoanterior2005,usoanterior2010,usoanterior2015,usoanterior2018,
-    usoanterior2019,usoanterior2020) %>%
+    group_by(municipios,pastagem,agricultura,usoanterior) %>%
     summarise(area_ha = n()*1.0) %>% as_tibble()
  
    rm(dt)
@@ -71,29 +69,37 @@ system.time(for (i in 1:bss$n) {
   
 ## aqui confere
 y1<- y
-
+rm(y)
 
 y1$cd_uf <- substr(y1$municipios,1,2)
 
 y1 <- y1 %>%    
-  group_by(cd_uf,pastagem,agricultura,usoanterior2000,usoanterior2005,usoanterior2010,usoanterior2015,usoanterior2018,
-    usoanterior2019,usoanterior2020) %>%
+  group_by(cd_uf,pastagem,agricultura,usoanterior) %>%
   summarise(area_ha_es = sum(area_ha,rm=FALSE)) %>% as_tibble()
 
+write.table(y1, "/Users/marlucescarabello/Dropbox/Work/GPP/Teeb/P4_adicional/tabelas/output/uso_hist_1985_2021_contagemano.csv",row.names = F, sep = ";")
 
-y_final_usoanterior2000 <- y1 %>% 
+sum(y1$usoanterior,na.rm = true)
+
+y_final_usoanterior <- y1 %>% filter(!is.na(cd_uf))%>%  
+  mutate(classe = ifelse(usoanterior %in% c(1), 'Pastagem','NAO')) %>%
+  group_by(classe) %>%  summarise(area_final = sum(area_ha_es,na.rm = TRUE))
+
+y_final_usoanterior
+
+y_final_usoanterior2018 <- y1 %>% 
   filter(!is.na(cd_uf))%>% 
-  mutate(classe = ifelse(usoanterior2000 %in% c(15), 'Pastagem',
-                           ifelse(usoanterior2000 %in% c(20, 39, 40, 41, 46, 47, 48, 62), 'Agricultura',
-                                  ifelse(usoanterior2000 %in% c(9), 'Silvicultura',
-                                         ifelse(usoanterior2000 %in% c(21), 'Mosaico',
-                                                ifelse(usoanterior2000  %in% c(3, 4, 5, 11, 13, 49, 50), 'Vegetacao Nativa',
-                                                      ifelse(usoanterior2000  %in% c(0, 12, 23, 24, 25, 29, 30, 31, 32, 33),'Outros',
-                                                             ifelse(usoanterior2000  %in% c(1000), 'NAO','ERRO')))))))) %>%
+  mutate(classe = ifelse(usoanterior2018 %in% c(15), 'Pastagem',
+                           ifelse(usoanterior2018 %in% c(20, 39, 40, 41, 46, 47, 48, 62), 'Agricultura',
+                                  ifelse(usoanterior2018 %in% c(9), 'Silvicultura',
+                                         ifelse(usoanterior2018 %in% c(21), 'Mosaico',
+                                                ifelse(usoanterior2018  %in% c(3, 4, 5, 11, 13, 49, 50), 'Vegetacao Nativa',
+                                                      ifelse(usoanterior2018  %in% c(0, 12, 23, 24, 25, 29, 30, 31, 32, 33),'Outros',
+                                                             ifelse(usoanterior2018  %in% c(1000), 'NAO','ERRO')))))))) %>%
   
   group_by(classe) %>% 
   summarise(area_final = sum(area_ha_es,na.rm = TRUE))
-y_final_usoanterior2000
+y_final_usoanterior2018
 
 
 
